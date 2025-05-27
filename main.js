@@ -1,5 +1,7 @@
 // Reference: https://observablehq.com/@d3/us-state-choropleth/2
+
 function preprocessNumColonies() {
+    // Returns the average number of colonies per state as a dictionary
     return d3.csv("data/save_the_bees.csv").then((data) => {
         let numColoniesCount = {};
 
@@ -59,7 +61,7 @@ function generateBubbleMap(numColonies) {
             .scaleLog()
             .base(10) // Could use another scale function
             .domain([3616, 2917015]) // Min and max values of num colonies
-            .range([5, 30]); // Min and max bubble sizes
+            .range([10, 35]); // Min and max bubble sizes
 
         // Tooltip
         const tooltip = d3
@@ -74,7 +76,7 @@ function generateBubbleMap(numColonies) {
             .style("padding", "10px")
             .style("position", "absolute");
 
-        // Add bubbles with corrected event handlers
+        // Add bubbles with event listeners
         svg.append("g")
             .selectAll("circle")
             .data(states.features)
@@ -101,11 +103,11 @@ function generateBubbleMap(numColonies) {
                     .style("top", event.pageY - 30 + "px");
             })
             .on("mouseleave", function (event, d) {
+                d3.select(this).attr("fill", "#9DA0FF");
                 tooltip
                     .transition()
                     .duration(200)
                     .style("opacity", 0);
-                d3.select(this).attr("fill", "#9DA0FF");
             })
             .on("click", function (event, d) {
                 alert(
