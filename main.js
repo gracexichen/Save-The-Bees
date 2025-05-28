@@ -124,6 +124,7 @@ function generateBubbleMap(numColonies) {
                 ).then((heatmapData) => {
                     generateHeatMap(heatmapData);
                 });
+                selected_state = d.properties.name;
             });
 
         // Draw state boundaries
@@ -263,6 +264,14 @@ function generateHeatMap(heatmapData) {
         .style("stroke", "#ddd")
         .style("stroke-width", "0.5px");
 
+    // Add title
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", -20)
+        .attr("text-anchor", "middle")
+        .attr("font-size", 24)
+        .text(`${selected_column} of ${selected_state} `);
+
     // Legend dimensions
     // const legendWidth = 120;
     // const legendHeight = 10;
@@ -358,6 +367,7 @@ function generateHeatMap(heatmapData) {
 
 // global variables
 let selected_column = "num_colonies";
+let selected_state = "California"; // TODO: change to default to entire US
 
 function main() {
     preprocessNumColonies().then((numColonies) => {
@@ -368,7 +378,11 @@ function main() {
         .getElementById("myDropdown")
         .addEventListener("change", function () {
             selected_column = this.value;
-            console.log(selected_column);
+            preprocessHeatMap(selected_state, selected_column).then(
+                (heatmapData) => {
+                    generateHeatMap(heatmapData);
+                }
+            );
         });
 }
 
