@@ -374,6 +374,12 @@ function main() {
         generateBubbleMap(numColonies);
     });
 
+    preprocessHeatMap(selected_state, selected_column).then(
+        (heatmapData) => {
+            generateHeatMap(heatmapData);
+        }
+    );
+
     document
         .getElementById("myDropdown")
         .addEventListener("change", function () {
