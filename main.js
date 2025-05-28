@@ -112,12 +112,18 @@ function generateBubbleMap(numColonies) {
                     .style("opacity", 0);
             })
             .on("click", function (event, d) {
-                alert(
-                    d.properties.name +
-                        " has an average of " +
-                        numColonies[d.properties.name] +
-                        " colonies"
-                );
+                // alert(
+                //     d.properties.name +
+                //         " has an average of " +
+                //         numColonies[d.properties.name] +
+                //         " colonies"
+                // );
+                preprocessHeatMap(
+                    d.properties.name,
+                    selected_column
+                ).then((heatmapData) => {
+                    generateHeatMap(heatmapData);
+                });
             });
 
         // Draw state boundaries
@@ -192,11 +198,13 @@ function preprocessHeatMap(state, column) {
 }
 
 function generateHeatMap(heatmapData) {
+    d3.select("#heat-map-viz").select("svg").remove();
+
     console.log(heatmapData);
     // Set the dimensions and margins of the graph
-    const margin = { top: 0, right: 30, bottom: 100, left: 100 };
+    const margin = { top: 70, right: 30, bottom: 100, left: 100 };
     const width = 600 - margin.left - margin.right;
-    const height = 200 - margin.top - margin.bottom;
+    const height = 400 - margin.top - margin.bottom;
 
     // Append the svg object
     const svg = d3
@@ -348,17 +356,20 @@ function generateHeatMap(heatmapData) {
     //     .text("Correlation (Pearson)");
 }
 
+// global variables
+let selected_column = "num_colonies";
+
 function main() {
     preprocessNumColonies().then((numColonies) => {
         generateBubbleMap(numColonies);
     });
 
-    preprocessHeatMap("Washington", "num_colonies").then(
-        (heatmapData) => {
-            generateHeatMap(heatmapData);
-        }
-    );
-    // generateHeatMap();
+    document
+        .getElementById("myDropdown")
+        .addEventListener("change", function () {
+            selected_column = this.value;
+            console.log(selected_column);
+        });
 }
 
 main();
