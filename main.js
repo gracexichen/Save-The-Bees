@@ -270,7 +270,7 @@ function generateHeatMap(heatmapData) {
     d3.select("#heat-map-viz").select("svg").remove();
 
     // Set the dimensions and margins of the graph
-    const margin = { top: 70, right: 30, bottom: 100, left: 100 };
+    const margin = { top: 70, right: 140, bottom: 100, left: 100 }; // increased right margin for vertical legend
     const width = 600 - margin.left - margin.right;
     const height = 400 - margin.top - margin.bottom;
 
@@ -285,7 +285,6 @@ function generateHeatMap(heatmapData) {
 
     // Get variable names for x axis groups
     const myGroups = heatmapData.xVars;
-
     const myVars = heatmapData.yVars;
 
     // Create x axis
@@ -310,13 +309,47 @@ function generateHeatMap(heatmapData) {
         .attr("transform", "translate(-10,10) rotate(-40)")
         .style("text-anchor", "end");
 
+    // Add X axis label
+    svg.append("text")
+        .attr("text-anchor", "middle")
+        .attr("x", width / 2)
+        .attr("y", height + 60) // position below x-axis ticks
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "14px")
+        .text("Year");
+
     // Add Y axis
     svg.append("g").call(d3.axisLeft(y));
 
+    // Add Y axis label
+    svg.append("text")
+        .attr("text-anchor", "middle")
+        .attr(
+            "transform",
+            `translate(${-60},${height / 2}) rotate(-90)`
+        ) // rotate text vertically on left
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "14px")
+        .text("Quarter");
+
+    // Define color scale - now with green (low) -> orange (middle) -> red (high)
     const colorScale = d3
         .scaleLinear()
-        .domain([0, 100])
-        .range(["#ffffff", "#1a9850"]);
+        .domain([0, 40, 60, 100])
+        .range(["#00cc00", "#bbfc23", "#fcf223", "#fc5223"]);
+
+    // Define tooltip BEFORE appending cells
+    const tooltip = d3
+        .select("#heat-map-viz")
+        .append("div")
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "1px")
+        .style("border-radius", "5px")
+        .style("padding", "10px")
+        .style("position", "absolute");
 
     // Add the heatmap cells
     svg.selectAll()
@@ -337,11 +370,11 @@ function generateHeatMap(heatmapData) {
             tooltip
                 .html(
                     `
-                Actual Value: ${d.actualValue}<br>
-                Heat Value: ${d.value.toLocaleString(undefined, {
-                    maximumFractionDigits: 2,
-                })}%
-              `
+                    Actual Value: ${d.actualValue}<br>
+                    Heat Value: ${d.value.toLocaleString(undefined, {
+                        maximumFractionDigits: 2,
+                    })}%
+                    `
                 )
                 .style("left", event.pageX + 10 + "px")
                 .style("top", event.pageY - 30 + "px");
@@ -350,111 +383,79 @@ function generateHeatMap(heatmapData) {
             tooltip.transition().duration(200).style("opacity", 0);
         });
 
-    // Define tooltip
-    const tooltip = d3
-        .select("#bubble-map-viz")
-        .append("div")
-        .style("opacity", 0)
-        .attr("class", "tooltip")
-        .style("background-color", "white")
-        .style("border", "solid")
-        .style("border-width", "1px")
-        .style("border-radius", "5px")
-        .style("padding", "10px")
-        .style("position", "absolute");
-
+    // === VERTICAL LEGEND ON THE RIGHT SIDE ===
     // Legend dimensions
-    // const legendWidth = 120;
-    // const legendHeight = 10;
-    // const legendMargin = { top: 0, right: 30, bottom: 30, left: 30 };
+    const legendWidth = 20;
+    const legendHeight = height;
+    const legendMargin = { top: 0, right: 0, bottom: 0, left: 10 };
 
-    // Create a legend
-    // const legendSvg = d3
-    //     .select("#heat_map")
-    //     .append("svg")
-    //     .attr(
-    //         "width",
-    //         legendWidth + legendMargin.left + legendMargin.right
-    //     )
-    //     .attr(
-    //         "height",
-    //         legendHeight + legendMargin.top + legendMargin.bottom
-    //     )
-    //     .append("g")
-    //     .attr(
-    //         "transform",
-    //         `translate(${legendMargin.left},${legendMargin.top})`
-    //     );
+    // Append a group for legend at the right side of heatmap (translated by width + margin.left + some spacing)
+    const legendSvg = svg
+        .append("g")
+        .attr(
+            "transform",
+            `translate(${width + legendMargin.left + 30}, 0)`
+        );
 
-    // // Create legend scale
-    // const legendScale = d3
-    //     .scaleLinear()
-    //     .domain([-0.25, 0.25])
-    //     .range([0, legendWidth]);
+    // Create legend scale (same domain as colorScale)
+    const legendScale = d3
+        .scaleLinear()
+        .domain([0, 100])
+        .range([legendHeight, 0]); // vertical scale, invert to match heatmap orientation
 
-    // // Create legend axis with ticks
-    // const legendAxis = d3
-    //     .axisBottom(legendScale)
-    //     .ticks(5)
-    //     .tickFormat(d3.format(".1f"));
+    // Create legend axis with ticks (vertical axis)
+    const legendAxis = d3
+        .axisRight(legendScale)
+        .ticks(5)
+        .tickFormat(d3.format(".0f"));
 
-    // // Add legend axis
-    // legendSvg
-    //     .append("g")
-    //     .attr("class", "legend-axis")
-    //     .attr("transform", `translate(0,${legendHeight})`)
-    //     .call(legendAxis);
+    // Add gradient defs
+    const defs = svg.append("defs");
+    const gradient = defs
+        .append("linearGradient")
+        .attr("id", "legend-gradient")
+        .attr("x1", "0%")
+        .attr("y1", "100%")
+        .attr("x2", "0%")
+        .attr("y2", "0%");
 
-    // // Add gradient colors
-    // const defs = legendSvg.append("defs");
-    // const gradient = defs
-    //     .append("linearGradient")
-    //     .attr("id", "legend-gradient")
-    //     .attr("x1", "0%")
-    //     .attr("y1", "0%")
-    //     .attr("x2", "100%")
-    //     .attr("y2", "0%");
+    gradient
+        .selectAll("stop")
+        .data([
+            { offset: "0%", color: "#00cc00" },
+            { offset: "30%", color: "#bbfc23" },
+            { offset: "60%", color: "#fcf223" },
+            { offset: "100%", color: "#fc5223" },
+        ])
+        .enter()
+        .append("stop")
+        .attr("offset", (d) => d.offset)
+        .attr("stop-color", (d) => d.color);
 
-    // // Add red
-    // gradient
-    //     .append("stop")
-    //     .attr("offset", "0%")
-    //     .attr("stop-color", "#d73027");
+    // Append rectangle with gradient fill for legend
+    legendSvg
+        .append("rect")
+        .attr("width", legendWidth)
+        .attr("height", legendHeight)
+        .style("fill", "url(#legend-gradient)");
 
-    // // Add white
-    // gradient
-    //     .append("stop")
-    //     .attr("offset", "50%")
-    //     .attr("stop-color", "#ffffff");
+    // Append axis to legend group
+    legendSvg
+        .append("g")
+        .attr("transform", `translate(${legendWidth},0)`)
+        .call(legendAxis);
 
-    // // Add green
-    // gradient
-    //     .append("stop")
-    //     .attr("offset", "100%")
-    //     .attr("stop-color", "#1a9850");
-
-    // // Append legend to svg (with gradient)
-    // legendSvg
-    //     .append("rect")
-    //     .attr("width", legendWidth)
-    //     .attr("height", legendHeight)
-    //     .style("fill", "url(#legend-gradient)");
-
-    // // Add annotations for legend
-    // d3.select("#heat-map-viz")
-    //     .append("svg")
-    //     .attr("width", legendWidth)
-    //     .attr(
-    //         "height",
-    //         legendHeight + legendMargin.top + legendMargin.bottom
-    //     )
-    //     .append("text")
-    //     .attr("x", legendMargin.left - 30)
-    //     .attr("y", legendMargin.top + 15)
-    //     .attr("font-family", "sans-serif")
-    //     .attr("font-size", "12px")
-    //     .text("Correlation (Pearson)");
+    // Add legend label
+    legendSvg
+        .append("text")
+        .attr("x", legendWidth / 2)
+        .attr("y", -10)
+        .attr("text-anchor", "middle")
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "12px")
+        .text("Heat Value (%)");
 }
+
 
 // global variables
 let selected_column = "num_colonies";

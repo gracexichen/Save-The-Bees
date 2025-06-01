@@ -11,17 +11,32 @@ html, body {
     flex-direction: row;
     height: 100vh;
     width: 100vw;
+    position: relative; /* Needed for absolute positioning of pseudo-element */
+}
+
+#container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('data/background-honey.jpg');
+    background-size: cover;
+    opacity: 0.6; /* 60% opacity */
+    z-index: -1; /* Places it behind the content */
 }
 
 #left-container {
-    margin: 2px 0px 2px 2px;
+    margin: 30px 0px 30px 30px;
     border: 3px solid black;
     border-right-width: 1.5px;
     flex: 1;
+    background-color: white;
 }
 
 #right-container {
-    margin: 2px 2px 2px 0px;
+    margin: 30px 30px 30px 0px;
     display: flex;
     flex-direction: column;
     width: 50vw;
@@ -29,28 +44,30 @@ html, body {
     border-left-width: 1.5px;
     padding: 10px;
     box-sizing: border-box;
+    background-color: white;
 }
 
 #title {
     display: flex;
     align-items: center;
-    gap: 10px;
     font-family: Arial, sans-serif;
     font-size: 30px;
     font-weight: bold;
-    margin-bottom: 10px;
 }
 
 #myDropdown {
+    width: fit-content;
     border: none;
     font-family: inherit;
     font-size: inherit;
     font-weight: inherit;
     outline: none;
     background: none;
+    max-width: 100%;
 }
 
 #state {
+    margin:15px;
     font-family: inherit;
     font-size: inherit;
     font-weight: inherit;
@@ -59,10 +76,11 @@ html, body {
 
 #description {
     font-family: Arial, sans-serif;
+    font-size: 14px;
     word-wrap: break-word;
     border: 1px solid #ccc;
     border-radius: 10px;
-    padding: 10px;
+    padding: 8px;
     width: 100%;
     box-sizing: border-box;
     flex-shrink: 0;
