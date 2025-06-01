@@ -8,22 +8,29 @@
 
     <body>
         <div id="container">
-            <div id="bubble-map-viz"></div>
-            <div>
+            <div id="left-container">
+                <div id="bubble-map-viz"></div>
+                <div id="us-map"></div>
+            </div>
+            <div id="right-container">
+                <div id="title">
+                    <select id="myDropdown">
+                        <option value="num_colonies">num_colonies</option>
+                        <option value="max_colonies">max_colonies</option>
+                        <option value="lost_colonies">lost_colonies</option>
+                        <option value="percent_lost">percent_lost</option>
+                        <option value="added_colonies">added_colonies</option>
+                        <option value="renovated_colonies">renovated_colonies</option>
+                        <option value="percent_renovated">percent_renovated</option>
+                        <option value="varroa_mites">varroa_mites</option>
+                        <option value="other_pests_and_parasites">other_pests_and_parasites</option>
+                        <option value="diseases">diseases</option>
+                        <option value="pesticides">pesticides</option>
+                    </select>
+                    <p id="state">of State</p>
+                </div>
+                <p id="description">Description/Explanation Description/Explanation Description/Explanation Description/Explanation Description/Explanation Description/Explanation Description/Explanation Description/Explanation</p>
                 <div id="heat-map-viz"></div>
-                <select id="myDropdown">
-                    <option value="num_colonies">num_colonies</option>
-                    <option value="max_colonies">max_colonies</option>
-                    <option value="lost_colonies">lost_colonies</option>
-                    <option value="percent_lost">percent_lost</option>
-                    <option value="added_colonies">added_colonies</option>
-                    <option value="renovated_colonies">renovated_colonies</option>
-                    <option value="percent_renovated">percent_renovated</option>
-                    <option value="varroa_mites">varroa_mites</option>
-                    <option value="other_pests_and_parasites">other_pests_and_parasites</option>
-                    <option value="diseases">diseases</option>
-                    <option value="pesticides">pesticides</option>
-                </select>
             </div>
         </div>
 

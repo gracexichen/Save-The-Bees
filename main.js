@@ -51,11 +51,15 @@ function generateBubbleMap(numColonies) {
         // Draw state interiors
         svg.append("g")
             .selectAll("path")
-            .data(states.features)
+            .data(
+                states.features.filter(
+                    (d) => d.properties.name !== "Alaska"
+                )
+            )
             .join("path")
-            .attr("fill", "#ccc")
-            .attr("stroke", "#fff")
-            .attr("stroke-width", 0.5)
+            .attr("fill", "#fff")
+            .attr("stroke", "#000")
+            .attr("stroke-width", 2)
             .attr("d", path);
 
         // Create a scale for bubble size
@@ -105,10 +109,15 @@ function generateBubbleMap(numColonies) {
                     .style("top", event.pageY - 30 + "px");
             })
             .on("mouseleave", function (event, d) {
+                if (selected_state === d.properties.name) {
+                    d3.selectAll("circle").attr("fill", "#9DA0FF");
+                    d3.select(this).attr("fill", "#ffe0ad");
+                    return;
+                }
                 d3.select(this).attr("fill", "#9DA0FF");
                 tooltip
                     .transition()
-                    .duration(200)
+                    // .duration(100)
                     .style("opacity", 0);
             })
             .on("click", function (event, d) {
@@ -130,18 +139,77 @@ function generateBubbleMap(numColonies) {
         // Draw state boundaries
         svg.append("path")
             .datum(
-                topojson.mesh(
-                    us,
-                    us.objects.states,
-                    (a, b) => a !== b
-                )
+                topojson.mesh(us, us.objects.states, (a, b) => {
+                    return a !== b;
+                })
             )
             .attr("fill", "none")
-            .attr("stroke", "#fff")
-            .attr("stroke-width", 1)
             .attr("stroke-linejoin", "round")
             .attr("d", path);
     });
+
+    // Compute total colonies
+    const totalColonies = Object.values(numColonies).reduce(
+        (a, b) => a + b,
+        0
+    );
+
+    // Create SVG for "United States" bubble
+    const usSvg = d3
+        .select("#us-map")
+        .append("svg")
+        .attr("width", 200)
+        .attr("height", 150)
+        .attr("viewBox", [0, 0, 200, 150])
+        .attr(
+            "style",
+            "max-width: 100%; height: auto; display: block; margin: auto;"
+        );
+
+    const usBubbleGroup = usSvg.append("g");
+
+    usBubbleGroup
+        .append("circle")
+        .attr("cx", 100)
+        .attr("cy", 75)
+        .attr("r", bubbleRadiusScale(totalColonies))
+        .attr("fill", "#9DA0FF")
+        .on("mouseover", function () {
+            d3.select(this).attr("fill", "#ffe0ad");
+            tooltip.style("opacity", 1);
+        })
+        .on("mousemove", function (event) {
+            tooltip
+                .html(
+                    `United States: ${Math.round(
+                        totalColonies
+                    ).toLocaleString()} colonies`
+                )
+                .style("left", event.pageX + 10 + "px")
+                .style("top", event.pageY - 30 + "px");
+        })
+        .on("mouseleave", function () {
+            d3.select(this).attr("fill", "#9DA0FF");
+            tooltip.style("opacity", 0);
+        })
+        .on("click", function () {
+            preprocessHeatMap("United States", selected_column).then(
+                (heatmapData) => {
+                    generateHeatMap(heatmapData);
+                }
+            );
+            selected_state = "United States";
+        });
+
+    // Add label below the bubble
+    usBubbleGroup
+        .append("text")
+        .attr("x", 100)
+        .attr("y", 135)
+        .attr("text-anchor", "middle")
+        .attr("font-family", "Arial, sans-serif")
+        .attr("font-size", "14px")
+        .text("United States");
 }
 
 function preprocessHeatMap(state, column) {
@@ -156,8 +224,6 @@ function preprocessHeatMap(state, column) {
 
         const stateData = data.filter((d) => d.state === state);
 
-        console.log(stateData);
-
         xVars.forEach((year) => {
             yVars.forEach((quarter) => {
                 const entry = stateData.find(
@@ -169,6 +235,7 @@ function preprocessHeatMap(state, column) {
                         x: year,
                         y: quarter,
                         value: +entry[column] || 0,
+                        actualValue: +entry[column] || 0,
                     });
                     if (+entry[column] > maxValue) {
                         maxValue = +entry[column];
@@ -178,6 +245,7 @@ function preprocessHeatMap(state, column) {
                         x: year,
                         y: quarter,
                         value: 0,
+                        actualValue: 0,
                     });
                 }
             });
@@ -187,9 +255,9 @@ function preprocessHeatMap(state, column) {
                 x: d.x,
                 y: d.y,
                 value: (d.value / maxValue) * 100,
+                actualValue: d.actualValue,
             }));
         }
-        console.log(heatmapData);
         return {
             xVars: xVars,
             yVars: yVars,
@@ -201,7 +269,6 @@ function preprocessHeatMap(state, column) {
 function generateHeatMap(heatmapData) {
     d3.select("#heat-map-viz").select("svg").remove();
 
-    console.log(heatmapData);
     // Set the dimensions and margins of the graph
     const margin = { top: 70, right: 30, bottom: 100, left: 100 };
     const width = 600 - margin.left - margin.right;
@@ -262,15 +329,39 @@ function generateHeatMap(heatmapData) {
         .attr("height", y.bandwidth())
         .style("fill", (d) => colorScale(d.value))
         .style("stroke", "#ddd")
-        .style("stroke-width", "0.5px");
+        .style("stroke-width", "0.5px")
+        .on("mouseover", function (event, d) {
+            tooltip.style("opacity", 1);
+        })
+        .on("mousemove", function (event, d) {
+            tooltip
+                .html(
+                    `
+                Actual Value: ${d.actualValue}<br>
+                Heat Value: ${d.value.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                })}%
+              `
+                )
+                .style("left", event.pageX + 10 + "px")
+                .style("top", event.pageY - 30 + "px");
+        })
+        .on("mouseleave", function (event, d) {
+            tooltip.transition().duration(200).style("opacity", 0);
+        });
 
-    // Add title
-    svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", -20)
-        .attr("text-anchor", "middle")
-        .attr("font-size", 24)
-        .text(`${selected_column} of ${selected_state} `);
+    // Define tooltip
+    const tooltip = d3
+        .select("#bubble-map-viz")
+        .append("div")
+        .style("opacity", 0)
+        .attr("class", "tooltip")
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "1px")
+        .style("border-radius", "5px")
+        .style("padding", "10px")
+        .style("position", "absolute");
 
     // Legend dimensions
     // const legendWidth = 120;
@@ -367,19 +458,23 @@ function generateHeatMap(heatmapData) {
 
 // global variables
 let selected_column = "num_colonies";
+let selected_column_name = "Number of Colonies";
 let selected_state = "California"; // TODO: change to default to entire US
 
 function main() {
+    // Initialize bubble map
     preprocessNumColonies().then((numColonies) => {
         generateBubbleMap(numColonies);
     });
 
+    // Initialize heat map
     preprocessHeatMap(selected_state, selected_column).then(
         (heatmapData) => {
             generateHeatMap(heatmapData);
         }
     );
 
+    // Listen to dropdown changes
     document
         .getElementById("myDropdown")
         .addEventListener("change", function () {
