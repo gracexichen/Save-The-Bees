@@ -28,7 +28,7 @@ html, body {
 }
 
 #left-container {
-    margin: 30px 0px 30px 30px;
+    margin: 30px 15px 30px 30px;
     border: 3px solid black;
     border-right-width: 1.5px;
     flex: 1;
@@ -36,10 +36,10 @@ html, body {
 }
 
 #right-container {
-    margin: 30px 30px 30px 0px;
+    margin: 30px 30px 30px 15px;
     display: flex;
     flex-direction: column;
-    width: 50vw;
+    flex: 1;
     border: 3px solid black;
     border-left-width: 1.5px;
     padding: 10px;
@@ -51,7 +51,7 @@ html, body {
     display: flex;
     align-items: center;
     font-family: Arial, sans-serif;
-    font-size: 30px;
+    font-size: 25px;
     font-weight: bold;
 }
 
@@ -63,7 +63,7 @@ html, body {
     font-weight: inherit;
     outline: none;
     background: none;
-    max-width: 100%;
+    text-align: right;
 }
 
 #state {
