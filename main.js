@@ -135,7 +135,7 @@ function generateBubbleMap(numColonies) {
                 });
                 selected_state = d.properties.name;
                 const state = document.getElementById("state");
-                state.textContent = "of " + d.properties.name;
+                state.textContent = "in " + d.properties.name;
             });
 
         // Draw state boundaries
