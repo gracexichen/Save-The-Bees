@@ -131,7 +131,7 @@ function generateBubbleMap(numColonies) {
                     d.properties.name,
                     selected_column
                 ).then((heatmapData) => {
-                    generateHeatMap(heatmapData);
+                    generateHeatMap(heatmapData, selected_column);
                 });
                 selected_state = d.properties.name;
                 const state = document.getElementById("state");
@@ -197,7 +197,7 @@ function generateBubbleMap(numColonies) {
         .on("click", function () {
             preprocessHeatMap("United States", selected_column).then(
                 (heatmapData) => {
-                    generateHeatMap(heatmapData);
+                    generateHeatMap(heatmapData, selected_column);
                 }
             );
             selected_state = "United States";
@@ -246,8 +246,8 @@ function preprocessHeatMap(state, column) {
                     heatmapData.push({
                         x: year,
                         y: quarter,
-                        value: 0,
-                        actualValue: 0,
+                        value: null,
+                        actualValue: null,
                     });
                 }
             });
@@ -256,10 +256,11 @@ function preprocessHeatMap(state, column) {
             heatmapData = heatmapData.map((d) => ({
                 x: d.x,
                 y: d.y,
-                value: (d.value / maxValue) * 100,
+                value: d.value === null ? null : (d.value / maxValue) * 100,
                 actualValue: d.actualValue,
             }));
         }
+
         return {
             xVars: xVars,
             yVars: yVars,
@@ -268,7 +269,7 @@ function preprocessHeatMap(state, column) {
     });
 }
 
-function generateHeatMap(heatmapData) {
+function generateHeatMap(heatmapData, selected_column) {
     d3.select("#heat-map-viz").select("svg").remove();
 
     // Set the dimensions and margins of the graph
@@ -288,6 +289,24 @@ function generateHeatMap(heatmapData) {
     // Get variable names for x axis groups
     const myGroups = heatmapData.xVars;
     const myVars = heatmapData.yVars;
+
+    let colorScale;
+    //change color scale based on the category
+    if(!selected_column.includes("percent")){
+        // Define color scale - now with green (low) -> orange (middle) -> red (high)
+        colorScale = d3
+            .scaleLinear()
+            .domain([0, 30, 60, 100])
+            .range(["#00cc00", "#bbfc23", "#fcf223", "#fc5223"]);
+    }else{
+        // Define color scale for the percentage categories ("Percent Lost, Percent Renovated")
+        // Blue (low) -> Green (middle) -> Yellow (high) -> Red (abnormal)
+        colorScale = d3
+            .scaleLinear()
+            .domain([0, 5, 10, 20, 50])
+            .range(["#005ae0", "#00cc00", "#a8ed2f","#e6fc23","#fc5223"]);
+    }
+
 
     // Create x axis
     const x = d3
@@ -334,12 +353,6 @@ function generateHeatMap(heatmapData) {
         .attr("font-size", "14px")
         .text("Quarter");
 
-    // Define color scale - now with green (low) -> orange (middle) -> red (high)
-    const colorScale = d3
-        .scaleLinear()
-        .domain([0, 40, 60, 100])
-        .range(["#00cc00", "#bbfc23", "#fcf223", "#fc5223"]);
-
     // Define tooltip BEFORE appending cells
     const tooltip = d3
         .select("#heat-map-viz")
@@ -362,7 +375,7 @@ function generateHeatMap(heatmapData) {
         .attr("y", (d) => y(d.y))
         .attr("width", x.bandwidth())
         .attr("height", y.bandwidth())
-        .style("fill", (d) => colorScale(d.value))
+        .style("fill", (d) => d.value === null ? 'grey' : colorScale(d.value))
         .style("stroke", "#ddd")
         .style("stroke-width", "0.5px")
         .on("mouseover", function (event, d) {
@@ -388,7 +401,7 @@ function generateHeatMap(heatmapData) {
     // === VERTICAL LEGEND ON THE RIGHT SIDE ===
     // Legend dimensions
     const legendWidth = 20;
-    const legendHeight = height;
+    const legendHeight = height - 40;
     const legendMargin = { top: 0, right: 0, bottom: 0, left: 10 };
 
     // Append a group for legend at the right side of heatmap (translated by width + margin.left + some spacing)
@@ -399,16 +412,25 @@ function generateHeatMap(heatmapData) {
             `translate(${width + legendMargin.left + 30}, 0)`
         );
 
-    // Create legend scale (same domain as colorScale)
-    const legendScale = d3
-        .scaleLinear()
+    // Create legend scale (same domain as colorScale) and set tick values
+    let legendScale;
+    let tickVals;
+    if(!selected_column.includes("percent")){       
+        legendScale = d3.scaleLinear()
         .domain([0, 100])
         .range([legendHeight, 0]); // vertical scale, invert to match heatmap orientation
+        tickVals =[0, 20, 40, 60, 80, 100];
+    }else {
+        legendScale = d3.scaleLinear()
+        .domain([0, 5, 10, 20, 50])
+        .range([legendHeight, legendHeight*0.8, legendHeight*0.6,legendHeight*0.3, 0]); // vertical scale, invert to match heatmap orientation
+        tickVals = [0, 5, 10, 20, 50];
+    }
 
     // Create legend axis with ticks (vertical axis)
     const legendAxis = d3
         .axisRight(legendScale)
-        .ticks(5)
+        .tickValues(tickVals)
         .tickFormat(d3.format(".0f"));
 
     // Add gradient defs
@@ -421,14 +443,25 @@ function generateHeatMap(heatmapData) {
         .attr("x2", "0%")
         .attr("y2", "0%");
 
+    let gradientData;
+    if(!selected_column.includes("percent")){   
+        gradientData =                  
+        [{ offset: "0%", color: "#00cc00" },
+        { offset: "40%", color: "#bbfc23" },
+        { offset: "60%", color: "#fcf223" },
+        { offset: "100%", color: "#fc5223" },]
+    } else{       
+        gradientData =                             
+        [{ offset: "0%", color: "#005ae0" },
+        { offset: "20%", color: "#00cc00" },
+        { offset: "40%", color: "#a8ed2f" },
+        { offset: "60%", color: "#e6fc23" },
+        { offset: "80%", color: "#fc5223" },]
+    }
+
     gradient
         .selectAll("stop")
-        .data([
-            { offset: "0%", color: "#00cc00" },
-            { offset: "30%", color: "#bbfc23" },
-            { offset: "60%", color: "#fcf223" },
-            { offset: "100%", color: "#fc5223" },
-        ])
+        .data(gradientData)
         .enter()
         .append("stop")
         .attr("offset", (d) => d.offset)
@@ -456,6 +489,26 @@ function generateHeatMap(heatmapData) {
         .attr("font-family", "sans-serif")
         .attr("font-size", "12px")
         .text("Heat Value (%)");
+
+    // Add Null color swatch
+    legendSvg
+        .append("rect")
+        .attr("x",legendWidth -20)
+        .attr("y",legendHeight + 10)
+        .attr("width", legendWidth)
+        .attr("height", 20)
+        .style("fill","grey");
+    // Add Null color swatch label
+    legendSvg
+        .append("text")
+            .attr("x", legendWidth + 25)
+            .attr("y", legendHeight + 25)
+            .style("fill", "black")
+            .text("No data")
+            .attr("text-anchor", "left")
+            .attr("text-anchor", "middle")
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "12px");
 }
 
 
@@ -487,7 +540,7 @@ function main() {
     // Initialize heat map
     preprocessHeatMap(selected_state, selected_column).then(
         (heatmapData) => {
-            generateHeatMap(heatmapData);
+            generateHeatMap(heatmapData, selected_column);
         }
     );
 
@@ -499,7 +552,7 @@ function main() {
             document.getElementById('description').textContent = descriptions[selected_column]
             preprocessHeatMap(selected_state, selected_column).then(
                 (heatmapData) => {
-                    generateHeatMap(heatmapData);
+                    generateHeatMap(heatmapData, selected_column);
                 }
             );
         });
