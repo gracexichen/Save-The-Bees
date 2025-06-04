@@ -464,6 +464,20 @@ let selected_column = "num_colonies";
 let selected_column_name = "Number of Colonies";
 let selected_state = "California"; // TODO: change to default to entire US
 
+//Object of descritions
+let descriptions = {"num_colonies":"The number of colonies per quarter.",
+                    "max_colonies":"The maximum number of colonies per quarter.",
+                    "lost_colonies": "The number of lost colonies per quarter.",
+                    "percent_lost": "The percentage of lost colonies per quarter.",
+                    "added_colonies": "The number of new colonies that were added.",
+                    "renovated_colonies": "The number of colonies renovated. Which means that the queen of the hive was replaced with a new queen, or new bees were added to the colony.",
+                    "percent_renovated":"The percentage of colonies renovated. Which means that the queen of the hive was replaced with a new queen, or new bees were added to the colony.",
+                    "varroa_mites":"The percentage of colonies affected by Varroa mites. Which is a type of pest reponsible of many honey bee deaths today.",
+                    "other_pests_and_parasites":"The percentage of colonies affected by other pests and parasites that are not Varroa mites.",
+                    "diseases":"The percentage of colonies affected by diseases.",
+                    "pesticides": "The percentage of colonies affected by pesticides."    
+}
+
 function main() {
     // Initialize bubble map
     preprocessNumColonies().then((numColonies) => {
@@ -482,6 +496,7 @@ function main() {
         .getElementById("myDropdown")
         .addEventListener("change", function () {
             selected_column = this.value;
+            document.getElementById('description').textContent = descriptions[selected_column]
             preprocessHeatMap(selected_state, selected_column).then(
                 (heatmapData) => {
                     generateHeatMap(heatmapData);
