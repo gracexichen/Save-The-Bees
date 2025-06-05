@@ -545,25 +545,30 @@ function generateHeatMap(heatmapData, selected_column) {
         .attr("font-size", "12px");
 }
 
-
 // global variables
-let selected_column = "num_colonies";
-let selected_column_name = "Number of Colonies";
-let selected_state = "California"; // TODO: change to default to entire US
+let selected_column = "select_metrics";
+let selected_column_name = "select_metrics";
+let selected_state = "";
 
 //Object of descritions
-let descriptions = {"num_colonies":"The number of colonies per quarter.",
-                    "max_colonies":"The maximum number of colonies per quarter.",
-                    "lost_colonies": "The number of lost colonies per quarter.",
-                    "percent_lost": "The percentage of lost colonies per quarter.",
-                    "added_colonies": "The number of new colonies that were added.",
-                    "renovated_colonies": "The number of colonies renovated. Which means that the queen of the hive was replaced with a new queen, or new bees were added to the colony.",
-                    "percent_renovated":"The percentage of colonies renovated. Which means that the queen of the hive was replaced with a new queen, or new bees were added to the colony.",
-                    "varroa_mites":"The percentage of colonies affected by Varroa mites. Which is a type of pest reponsible of many honey bee deaths today.",
-                    "other_pests_and_parasites":"The percentage of colonies affected by other pests and parasites that are not Varroa mites.",
-                    "diseases":"The percentage of colonies affected by diseases.",
-                    "pesticides": "The percentage of colonies affected by pesticides."    
-}
+let descriptions = {
+    select_metrics: "Select a metric to view on the map.",
+    num_colonies: "The number of colonies per quarter.",
+    max_colonies: "The maximum number of colonies per quarter.",
+    lost_colonies: "The number of lost colonies per quarter.",
+    percent_lost: "The percentage of lost colonies per quarter.",
+    added_colonies: "The number of new colonies that were added.",
+    renovated_colonies:
+        "The number of colonies renovated. Which means that the queen of the hive was replaced with a new queen, or new bees were added to the colony.",
+    percent_renovated:
+        "The percentage of colonies renovated. Which means that the queen of the hive was replaced with a new queen, or new bees were added to the colony.",
+    varroa_mites:
+        "The percentage of colonies affected by Varroa mites. Which is a type of pest reponsible of many honey bee deaths today.",
+    other_pests_and_parasites:
+        "The percentage of colonies affected by other pests and parasites that are not Varroa mites.",
+    diseases: "The percentage of colonies affected by diseases.",
+    pesticides: "The percentage of colonies affected by pesticides.",
+};
 
 function main() {
     // Initialize bubble map
@@ -583,15 +588,24 @@ function main() {
         .getElementById("myDropdown")
         .addEventListener("change", function () {
             selected_column = this.value;
-            document.getElementById('description').textContent = descriptions[selected_column]
+            if (selected_column == "select_metrics") {
+                selected_column_name = "select_metrics";
+                selected_state = "";
+                const state = document.getElementById("state");
+                state.textContent = "in {select state}";
+            }
+            document.getElementById("description").textContent =
+                descriptions[selected_column];
             preprocessHeatMap(selected_state, selected_column).then(
                 (heatmapData) => {
                     generateHeatMap(heatmapData, selected_column);
                 }
             );
-            preprocessBubbleData(selected_column).then((aggregated_data) => {
-                generateBubbleMap(aggregated_data);
-            });
+            preprocessBubbleData(selected_column).then(
+                (aggregated_data) => {
+                    generateBubbleMap(aggregated_data);
+                }
+            );
         });
 }
 

@@ -44,6 +44,21 @@ html, body {
     background-color: white;
 }
 
+#left-title {
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+#left-desc {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    color: #333;
+    width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+    border: 3px solid rgba(255, 140, 0, 0.6);
+}
+
 #right-container {
     margin-right: 15px;
     display: flex;
