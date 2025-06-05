@@ -1,6 +1,13 @@
 // Reference: https://observablehq.com/@d3/us-state-choropleth/2
 
-
+const percent_columns = [
+  "percent_lost",
+  "percent_renovated",
+  "varroa_mites",
+  "other_pests_and_parasites",
+  "diseases",
+  "pesticides"
+];
 
 function preprocessNumColonies() {
     // Returns the average number of colonies per state as a dictionary
@@ -222,7 +229,7 @@ function preprocessHeatMap(state, column) {
         const yVars = [1, 2, 3, 4];
 
         let heatmapData = [];
-        let maxValue = 0;
+        let maxValue = 0;        
 
         const stateData = data.filter((d) => d.state === state);
 
@@ -256,7 +263,7 @@ function preprocessHeatMap(state, column) {
             heatmapData = heatmapData.map((d) => ({
                 x: d.x,
                 y: d.y,
-                value: d.value === null ? null : (d.value / maxValue) * 100,
+                value: d.value,
                 actualValue: d.actualValue,
             }));
         }
@@ -265,6 +272,7 @@ function preprocessHeatMap(state, column) {
             xVars: xVars,
             yVars: yVars,
             correlationData: heatmapData,
+            maxValue: maxValue
         };
     });
 }
@@ -292,18 +300,18 @@ function generateHeatMap(heatmapData, selected_column) {
 
     let colorScale;
     //change color scale based on the category
-    if(!selected_column.includes("percent")){
+    if(!percent_columns.includes(selected_column)){
         // Define color scale - now with green (low) -> orange (middle) -> red (high)
         colorScale = d3
             .scaleLinear()
-            .domain([0, 30, 60, 100])
+            .domain([0, heatmapData.maxValue * 0.4,  heatmapData.maxValue * 0.6,  heatmapData.maxValue])
             .range(["#00cc00", "#bbfc23", "#fcf223", "#fc5223"]);
     }else{
         // Define color scale for the percentage categories ("Percent Lost, Percent Renovated")
         // Blue (low) -> Green (middle) -> Yellow (high) -> Red (abnormal)
         colorScale = d3
             .scaleLinear()
-            .domain([0, 5, 10, 20, 50])
+            .domain([0, 5, 10, 20, 70])
             .range(["#005ae0", "#00cc00", "#a8ed2f","#e6fc23","#fc5223"]);
     }
 
@@ -385,10 +393,7 @@ function generateHeatMap(heatmapData, selected_column) {
             tooltip
                 .html(
                     `
-                    Actual Value: ${d.actualValue}<br>
-                    Heat Value: ${d.value.toLocaleString(undefined, {
-                        maximumFractionDigits: 2,
-                    })}%
+                    Actual Value: ${d.actualValue}
                     `
                 )
                 .style("left", event.pageX + 10 + "px")
@@ -415,16 +420,16 @@ function generateHeatMap(heatmapData, selected_column) {
     // Create legend scale (same domain as colorScale) and set tick values
     let legendScale;
     let tickVals;
-    if(!selected_column.includes("percent")){       
+    if(!percent_columns.includes(selected_column)){       
         legendScale = d3.scaleLinear()
-        .domain([0, 100])
+        .domain([0, heatmapData.maxValue])
         .range([legendHeight, 0]); // vertical scale, invert to match heatmap orientation
-        tickVals =[0, 20, 40, 60, 80, 100];
+        tickVals = ([0, heatmapData.maxValue * 0.4, heatmapData.maxValue * 0.6, heatmapData.maxValue])
     }else {
         legendScale = d3.scaleLinear()
-        .domain([0, 5, 10, 20, 50])
+        .domain([0, 5, 10, 20, 70])
         .range([legendHeight, legendHeight*0.8, legendHeight*0.6,legendHeight*0.3, 0]); // vertical scale, invert to match heatmap orientation
-        tickVals = [0, 5, 10, 20, 50];
+        tickVals = [0, 5, 10, 20, 70];
     }
 
     // Create legend axis with ticks (vertical axis)
@@ -444,7 +449,7 @@ function generateHeatMap(heatmapData, selected_column) {
         .attr("y2", "0%");
 
     let gradientData;
-    if(!selected_column.includes("percent")){   
+    if(!percent_columns.includes(selected_column)){   
         gradientData =                  
         [{ offset: "0%", color: "#00cc00" },
         { offset: "40%", color: "#bbfc23" },
@@ -480,6 +485,20 @@ function generateHeatMap(heatmapData, selected_column) {
         .attr("transform", `translate(${legendWidth},0)`)
         .call(legendAxis);
 
+
+    let labels = {"num_colonies":"# of colonies",
+                    "max_colonies":"# of colonies",
+                    "lost_colonies": "# of colonies",
+                    "percent_lost": "Percentage (%)",
+                    "added_colonies": "# of colonies",
+                    "renovated_colonies": "# of colonies",
+                    "percent_renovated":"Percentage (%)",
+                    "varroa_mites":"Percentage (%)",
+                    "other_pests_and_parasites":"Percentage (%)",
+                    "diseases":"Percentage(%)",
+                    "pesticides": "Percentage (%)"    
+}
+
     // Add legend label
     legendSvg
         .append("text")
@@ -488,7 +507,7 @@ function generateHeatMap(heatmapData, selected_column) {
         .attr("text-anchor", "middle")
         .attr("font-family", "sans-serif")
         .attr("font-size", "12px")
-        .text("Heat Value (%)");
+        .text(labels[selected_column]);
 
     // Add Null color swatch
     legendSvg
