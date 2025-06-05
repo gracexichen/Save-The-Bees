@@ -394,6 +394,7 @@ function generateHeatMap(heatmapData, selected_column) {
         .attr("y", (d) => y(d.y))
         .attr("width", x.bandwidth())
         .attr("height", y.bandwidth())
+        .style("opacity", 0)
         .style("fill", (d) =>
             d.value === null ? "grey" : colorScale(d.value)
         )
@@ -407,7 +408,11 @@ function generateHeatMap(heatmapData, selected_column) {
                 .html(`Actual Value: ${d.actualValue}`)
                 .style("left", event.pageX + 2 + "px")
                 .style("top", event.pageY - 3 + "px");
-        });
+        })
+        .transition()
+        .delay((d, i) => i * 70) // Animate one-by-one
+        .duration(500)
+        .style("opacity", 1);
 
     // Add mouseleave to the SVG
     d3.select("#heatmap-cells").on("mouseleave", function () {
