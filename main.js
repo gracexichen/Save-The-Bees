@@ -292,7 +292,7 @@ function generateHeatMap(heatmapData, selected_column) {
 
     // Set the dimensions and margins of the graph
     const margin = { top: 70, right: 140, bottom: 100, left: 100 }; // increased right margin for vertical legend
-    const width = 500 - margin.left - margin.right;
+    const width = 600 - margin.left - margin.right;
     const height = 400 - margin.top - margin.bottom;
 
     // Append the svg object

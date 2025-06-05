@@ -4,14 +4,23 @@ html, body {
     overflow: hidden;
     width: 100%;
     height: 100%;
+    background-image: url('data/background-honey.jpg');
+}
+
+#main-title {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    margin: 10px 0 0 0;
+    color: #333;
 }
 
 #container {
     display: flex;
     flex-direction: row;
-    height: 100vh;
+    height: calc(100vh - 60px);
     width: 100vw;
     position: relative;
+    gap:15px;
 }
 
 #container::before {
@@ -21,14 +30,13 @@ html, body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('data/background-honey.jpg');
     background-size: cover;
     opacity: 0.6;
     z-index: -1;
 }
 
 #left-container {
-    margin: 30px 15px 30px 30px;
+    margin-left: 15px;
     border: 3px solid rgba(255, 140, 0, 0.6);
     border-right-width: 1.5px;
     border-radius: 15px;
@@ -37,7 +45,7 @@ html, body {
 }
 
 #right-container {
-    margin: 30px 30px 30px 15px;
+    margin-right: 15px;
     display: flex;
     flex-direction: column;
     flex: 1;
