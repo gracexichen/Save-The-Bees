@@ -10,12 +10,14 @@
         <h1 id="main-title">Bee Colony Statistics Dashboard</h1>
         <div id="container">
             <div id="left-container">
+                <p id="left-desc">Select the column using dropdown on the right panel and click on a state's bubble to view its data.</p>
                 <div id="bubble-map-viz"></div>
                 <div id="us-map"></div>
             </div>
             <div id="right-container">
                 <div id="title">
-                    <select id="myDropdown">
+                    <select id="myDropdown" selected="select_metrics">
+                        <option value="select_metrics">-- Select Metrics --</option>
                         <option value="num_colonies">Number of Colonies</option>
                         <option value="max_colonies">Max Colonies</option>
                         <option value="lost_colonies">Lost Colonies</option>
@@ -28,7 +30,7 @@
                         <option value="diseases">Diseases</option>
                         <option value="pesticides">Pesticides</option>
                     </select>
-                    <p id="state">in California</p>
+                    <p id="state">in {select state}</p>
                 </div>
                 <p id="description">The number of colonies per quarter.</p>
                 <div id="heat-map-viz"></div>
