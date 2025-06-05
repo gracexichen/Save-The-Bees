@@ -545,11 +545,10 @@ function generateHeatMap(heatmapData, selected_column) {
         .attr("font-size", "12px");
 }
 
-
 // global variables
-let selected_column = "num_colonies";
-let selected_column_name = "Number of Colonies";
-let selected_state = "California"; // TODO: change to default to entire US
+let selected_column = "select_metrics";
+let selected_column_name = "select_metrics";
+let selected_state = "";
 
 //Object of descritions
 let descriptions = {"num_colonies":"The number of colonies per quarter.",
