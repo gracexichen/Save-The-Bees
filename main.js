@@ -1,13 +1,22 @@
 // Reference: https://observablehq.com/@d3/us-state-choropleth/2
 
 const percent_columns = [
-  "percent_lost",
-  "percent_renovated",
-  "varroa_mites",
-  "other_pests_and_parasites",
-  "diseases",
-  "pesticides"
+    "percent_lost",
+    "percent_renovated",
+    "varroa_mites",
+    "other_pests_and_parasites",
+    "diseases",
+    "pesticides",
 ];
+
+function getContainerSize(container_id) {
+    const container = document.getElementById(container_id);
+    const rect = container.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    console.log("width", width, "height", height);
+    return [width, height];
+}
 
 function preprocessBubbleData(selected_column) {
     // Returns the average number of colonies per state as a dictionary
@@ -41,7 +50,8 @@ function preprocessBubbleData(selected_column) {
 }
 
 function generateBubbleMap(numColonies) {
-    d3.select("#bubble-map-viz").select("svg").remove();
+    d3.select("#bubble-map-viz").selectAll("*").remove();
+    d3.select("#us-map").selectAll("*").remove();
 
     d3.json("/data/counties-albers-10m.json").then((us) => {
         const path = d3.geoPath();
@@ -290,10 +300,14 @@ function preprocessHeatMap(state, column) {
 function generateHeatMap(heatmapData, selected_column) {
     d3.select("#heat-map-viz").select("svg").remove();
 
+    const [containerWidth, containerHeight] =
+        getContainerSize("right-container");
+
     // Set the dimensions and margins of the graph
     const margin = { top: 70, right: 140, bottom: 100, left: 100 }; // increased right margin for vertical legend
-    const width = 600 - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom;
+    const width = containerWidth - margin.left - margin.right;
+    const height =
+        containerHeight * (3 / 5) - margin.top - margin.bottom;
 
     // Append the svg object
     const svg = d3
@@ -301,6 +315,7 @@ function generateHeatMap(heatmapData, selected_column) {
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
+        .attr("style", "max-width: 100%; height: auto;")
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -414,26 +429,39 @@ function generateHeatMap(heatmapData, selected_column) {
         tooltip.transition().duration(0).style("opacity", 0);
     });
 
-    addHeatmapLegend(heatmapData, selected_column);
+    addHeatmapLegend(
+        heatmapData,
+        selected_column,
+        containerWidth,
+        containerHeight
+    );
 }
 
-function addHeatmapLegend(heatmapData, selected_column) {
+function addHeatmapLegend(
+    heatmapData,
+    selected_column,
+    containerWidth,
+    containerHeight
+) {
     const svg = d3.select("#heat-map-viz").select("svg").select("g");
     d3.select("#heatmap-legend").remove();
+
     // dimensions of heatmap svg
     const margin = { top: 70, right: 140, bottom: 100, left: 100 }; // increased right margin for vertical legend
-    const width = 600 - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom;
+    const width = containerWidth - margin.left - margin.right;
+    const height =
+        containerHeight * (3 / 5) - margin.top - margin.bottom;
 
     // === VERTICAL LEGEND ON THE RIGHT SIDE ===
     // Legend dimensions
-    const legendWidth = 20;
+    const legendWidth = height / 10;
     const legendHeight = height - 40;
     const legendMargin = { top: 0, right: 0, bottom: 0, left: 10 };
 
     // Append a group for legend at the right side of heatmap (translated by width + margin.left + some spacing)
     const legendSvg = svg
-        .append("g").attr("id", "heatmap-legend")
+        .append("g")
+        .attr("id", "heatmap-legend")
         .attr(
             "transform",
             `translate(${width + legendMargin.left + 30}, 0)`
@@ -556,7 +584,6 @@ function addHeatmapLegend(heatmapData, selected_column) {
         .attr("font-size", "12px");
 }
 
-
 function updateHeatmap(heatmapData, selected_column) {
     let colorScale = d3
         .scaleLinear()
@@ -568,12 +595,12 @@ function updateHeatmap(heatmapData, selected_column) {
         ])
         .range(["#00cc00", "#bbfc23", "#fcf223", "#fc5223"]);
 
-    const heatmapCells = d3.select("#heatmap-cells")
+    const heatmapCells = d3.select("#heatmap-cells");
 
-    const rects = heatmapCells.selectAll("rect")
-        .data(heatmapData.correlationData, (d) => `${d.x}:${d.y}`)
+    const rects = heatmapCells
+        .selectAll("rect")
+        .data(heatmapData.correlationData, (d) => `${d.x}:${d.y}`);
 
-    
     rects
         .transition()
         .duration(0)
@@ -581,13 +608,21 @@ function updateHeatmap(heatmapData, selected_column) {
         .transition()
         .delay((d, i) => i * 70)
         .duration(700)
-        .style("fill", d => d.value === null ? "grey" : colorScale(d.value)) // Step 2: update color
+        .style("fill", (d) =>
+            d.value === null ? "grey" : colorScale(d.value)
+        ) // Step 2: update color
         .style("opacity", 1); // Step 3: fade back in
 
-    addHeatmapLegend(heatmapData, selected_column);
+    // Get current container dimensions for legend update
+    const [containerWidth, containerHeight] =
+        getContainerSize("right-container");
+    addHeatmapLegend(
+        heatmapData,
+        selected_column,
+        containerWidth,
+        containerHeight
+    );
 }
-
-
 
 // global variables
 let selected_column = "select_metrics";
@@ -614,7 +649,7 @@ let descriptions = {
     pesticides: "The percentage of colonies affected by pesticides.",
 };
 
-function main() {
+function initializeVisualization() {
     // Initialize bubble map
     preprocessBubbleData(selected_column).then((aggregated_data) => {
         generateBubbleMap(aggregated_data);
@@ -626,6 +661,20 @@ function main() {
             generateHeatMap(heatmapData, selected_column);
         }
     );
+}
+
+function resizeVisualization() {
+    // Only regenerate heatmap since it's the one that needs responsive sizing
+    // Bubble map uses fixed viewBox and scales automatically
+    preprocessHeatMap(selected_state, selected_column).then(
+        (heatmapData) => {
+            generateHeatMap(heatmapData, selected_column);
+        }
+    );
+}
+
+function main() {
+    initializeVisualization();
 
     // Listen to dropdown changes
     document
@@ -637,7 +686,17 @@ function main() {
                 selected_state = "";
                 const state = document.getElementById("state");
                 state.textContent = "in {select state}";
+
+                // Clear visualizations when "select metrics" is chosen
+                d3.select("#bubble-map-viz").selectAll("*").remove();
+                d3.select("#us-map").selectAll("*").remove();
+                d3.select("#heat-map-viz").selectAll("*").remove();
+
+                document.getElementById("description").textContent =
+                    descriptions[selected_column];
+                return; // Exit early, don't generate new visualizations
             }
+
             document.getElementById("description").textContent =
                 descriptions[selected_column];
             preprocessHeatMap(selected_state, selected_column).then(
@@ -654,3 +713,19 @@ function main() {
 }
 
 main();
+
+// Debounce function to limit resize frequency
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Listen for window resize with debouncing
+window.addEventListener("resize", debounce(resizeVisualization, 250));
