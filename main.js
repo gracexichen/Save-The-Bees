@@ -58,7 +58,7 @@ function generateBubbleMap(numColonies) {
             .attr("style", "max-width: 100%; height: auto;");
 
         // Draw state interiors
-        svg.append("g")
+        const g = svg.append("g")
             .selectAll("path")
             .data(
                 states.features.filter(
@@ -111,7 +111,7 @@ function generateBubbleMap(numColonies) {
             .style("position", "absolute");
 
         // Add bubbles with event listeners
-        svg.append("g")
+        const bubbles = svg.append("g")
             .selectAll("circle")
             .data(states.features)
             .join("circle")
@@ -120,7 +120,7 @@ function generateBubbleMap(numColonies) {
             .attr("r", (d) =>
                 bubbleRadiusScale(numColonies[d.properties.name])
             )
-            .attr("fill", "#9DA0FF")
+            .attr("fill", (d) => (selected_state === d.properties.name) ? "#ffe0ad" : "#9DA0FF")
             .attr("border", "none")
             .on("mouseover", function (event, d) {
                 d3.select(this).attr("fill", "#ffe0ad");
@@ -165,6 +165,15 @@ function generateBubbleMap(numColonies) {
                 const state = document.getElementById("state");
                 state.textContent = "in " + d.properties.name;
             });
+
+        const zoom = d3.zoom()
+            .scaleExtent([1, 8]) // min and max zoom
+            .on("zoom", (event) => {
+                g.attr("transform", event.transform);
+                bubbles.attr("transform", event.transform);
+            });
+
+        svg.call(zoom);
     });
 
     // Compute total colonies
