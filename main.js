@@ -297,21 +297,16 @@ function generateHeatMap(heatmapData, selected_column) {
 
     let colorScale;
     //change color scale based on the category
-    if(!percent_columns.includes(selected_column)){
-        // Define color scale - now with green (low) -> orange (middle) -> red (high)
-        colorScale = d3
-            .scaleLinear()
-            .domain([0, heatmapData.maxValue * 0.4,  heatmapData.maxValue * 0.6,  heatmapData.maxValue])
-            .range(["#00cc00", "#bbfc23", "#fcf223", "#fc5223"]);
-    }else{
-        // Define color scale for the percentage categories ("Percent Lost, Percent Renovated")
-        // Blue (low) -> Green (middle) -> Yellow (high) -> Red (abnormal)
-        colorScale = d3
-            .scaleLinear()
-            .domain([0, 5, 10, 20, 70])
-            .range(["#005ae0", "#00cc00", "#a8ed2f","#e6fc23","#fc5223"]);
-    }
-
+    // Define color scale - now with green (low) -> orange (middle) -> red (high)
+    colorScale = d3
+        .scaleLinear()
+        .domain([
+            0,
+            heatmapData.maxValue * 0.4,
+            heatmapData.maxValue * 0.6,
+            heatmapData.maxValue,
+        ])
+        .range(["#00cc00", "#bbfc23", "#fcf223", "#fc5223"]);
 
     // Create x axis
     const x = d3
@@ -380,7 +375,9 @@ function generateHeatMap(heatmapData, selected_column) {
         .attr("y", (d) => y(d.y))
         .attr("width", x.bandwidth())
         .attr("height", y.bandwidth())
-        .style("fill", (d) => d.value === null ? 'grey' : colorScale(d.value))
+        .style("fill", (d) =>
+            d.value === null ? "grey" : colorScale(d.value)
+        )
         .style("stroke", "#ddd")
         .style("stroke-width", "0.5px")
         .on("mouseover", function (event, d) {
@@ -417,15 +414,28 @@ function generateHeatMap(heatmapData, selected_column) {
     // Create legend scale (same domain as colorScale) and set tick values
     let legendScale;
     let tickVals;
-    if(!percent_columns.includes(selected_column)){       
-        legendScale = d3.scaleLinear()
-        .domain([0, heatmapData.maxValue])
-        .range([legendHeight, 0]); // vertical scale, invert to match heatmap orientation
-        tickVals = ([0, heatmapData.maxValue * 0.4, heatmapData.maxValue * 0.6, heatmapData.maxValue])
-    }else {
-        legendScale = d3.scaleLinear()
-        .domain([0, 5, 10, 20, 70])
-        .range([legendHeight, legendHeight*0.8, legendHeight*0.6,legendHeight*0.3, 0]); // vertical scale, invert to match heatmap orientation
+    if (!percent_columns.includes(selected_column)) {
+        legendScale = d3
+            .scaleLinear()
+            .domain([0, heatmapData.maxValue])
+            .range([legendHeight, 0]); // vertical scale, invert to match heatmap orientation
+        tickVals = [
+            0,
+            heatmapData.maxValue * 0.4,
+            heatmapData.maxValue * 0.6,
+            heatmapData.maxValue,
+        ];
+    } else {
+        legendScale = d3
+            .scaleLinear()
+            .domain([0, 5, 10, 20, 70])
+            .range([
+                legendHeight,
+                legendHeight * 0.8,
+                legendHeight * 0.6,
+                legendHeight * 0.3,
+                0,
+            ]); // vertical scale, invert to match heatmap orientation
         tickVals = [0, 5, 10, 20, 70];
     }
 
@@ -445,21 +455,12 @@ function generateHeatMap(heatmapData, selected_column) {
         .attr("x2", "0%")
         .attr("y2", "0%");
 
-    let gradientData;
-    if(!percent_columns.includes(selected_column)){   
-        gradientData =                  
-        [{ offset: "0%", color: "#00cc00" },
+    gradientData = [
+        { offset: "0%", color: "#00cc00" },
         { offset: "40%", color: "#bbfc23" },
         { offset: "60%", color: "#fcf223" },
-        { offset: "100%", color: "#fc5223" },]
-    } else{       
-        gradientData =                             
-        [{ offset: "0%", color: "#005ae0" },
-        { offset: "20%", color: "#00cc00" },
-        { offset: "40%", color: "#a8ed2f" },
-        { offset: "60%", color: "#e6fc23" },
-        { offset: "80%", color: "#fc5223" },]
-    }
+        { offset: "100%", color: "#fc5223" },
+    ];
 
     gradient
         .selectAll("stop")
@@ -482,19 +483,19 @@ function generateHeatMap(heatmapData, selected_column) {
         .attr("transform", `translate(${legendWidth},0)`)
         .call(legendAxis);
 
-
-    let labels = {"num_colonies":"# of colonies",
-                    "max_colonies":"# of colonies",
-                    "lost_colonies": "# of colonies",
-                    "percent_lost": "Percentage (%)",
-                    "added_colonies": "# of colonies",
-                    "renovated_colonies": "# of colonies",
-                    "percent_renovated":"Percentage (%)",
-                    "varroa_mites":"Percentage (%)",
-                    "other_pests_and_parasites":"Percentage (%)",
-                    "diseases":"Percentage(%)",
-                    "pesticides": "Percentage (%)"    
-}
+    let labels = {
+        num_colonies: "# of colonies",
+        max_colonies: "# of colonies",
+        lost_colonies: "# of colonies",
+        percent_lost: "Percentage (%)",
+        added_colonies: "# of colonies",
+        renovated_colonies: "# of colonies",
+        percent_renovated: "Percentage (%)",
+        varroa_mites: "Percentage (%)",
+        other_pests_and_parasites: "Percentage (%)",
+        diseases: "Percentage(%)",
+        pesticides: "Percentage (%)",
+    };
 
     // Add legend label
     legendSvg
@@ -509,22 +510,22 @@ function generateHeatMap(heatmapData, selected_column) {
     // Add Null color swatch
     legendSvg
         .append("rect")
-        .attr("x",legendWidth -20)
-        .attr("y",legendHeight + 10)
+        .attr("x", legendWidth - 20)
+        .attr("y", legendHeight + 10)
         .attr("width", legendWidth)
         .attr("height", 20)
-        .style("fill","grey");
+        .style("fill", "grey");
     // Add Null color swatch label
     legendSvg
         .append("text")
-            .attr("x", legendWidth + 25)
-            .attr("y", legendHeight + 25)
-            .style("fill", "black")
-            .text("No data")
-            .attr("text-anchor", "left")
-            .attr("text-anchor", "middle")
-            .attr("font-family", "sans-serif")
-            .attr("font-size", "12px");
+        .attr("x", legendWidth + 25)
+        .attr("y", legendHeight + 25)
+        .style("fill", "black")
+        .text("No data")
+        .attr("text-anchor", "left")
+        .attr("text-anchor", "middle")
+        .attr("font-family", "sans-serif")
+        .attr("font-size", "12px");
 }
 
 
