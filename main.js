@@ -68,7 +68,8 @@ function generateBubbleMap(numColonies) {
             .attr("style", "max-width: 100%; height: auto;");
 
         // Draw state interiors
-        const g = svg.append("g")
+        const g = svg
+            .append("g")
             .selectAll("path")
             .data(
                 states.features.filter(
@@ -82,9 +83,13 @@ function generateBubbleMap(numColonies) {
             .attr("d", path);
 
         // Create a scale for bubble size
+        // Create a scale for bubble size
+        const isPercentColumn =
+            percent_columns.includes(selected_column);
+
         const bubbleRadiusScale = d3
             .scaleLog()
-            .base(10) // Could use another scale function
+            .base(10)
             .domain([
                 Math.max(
                     Math.min(...Object.values(numColonies)),
@@ -92,7 +97,7 @@ function generateBubbleMap(numColonies) {
                 ),
                 Math.max(...Object.values(numColonies)),
             ]) // Min and max values of num colonies
-            .range([10, 35]); // Min and max bubble sizes
+            .range(isPercentColumn ? [5, 25] : [10, 35]); // Smaller range for percent columns
 
         // Retrieve the units of the bubble values, used for tooltip
         const units = [
@@ -121,7 +126,8 @@ function generateBubbleMap(numColonies) {
             .style("position", "absolute");
 
         // Add bubbles with event listeners
-        const bubbles = svg.append("g")
+        const bubbles = svg
+            .append("g")
             .selectAll("circle")
             .data(states.features)
             .join("circle")
@@ -130,7 +136,11 @@ function generateBubbleMap(numColonies) {
             .attr("r", (d) =>
                 bubbleRadiusScale(numColonies[d.properties.name])
             )
-            .attr("fill", (d) => (selected_state === d.properties.name) ? "#ffe0ad" : "#9DA0FF")
+            .attr("fill", (d) =>
+                selected_state === d.properties.name
+                    ? "#ffe0ad"
+                    : "#9DA0FF"
+            )
             .attr("border", "none")
             .on("mouseover", function (event, d) {
                 d3.select(this).attr("fill", "#ffe0ad");
@@ -176,7 +186,8 @@ function generateBubbleMap(numColonies) {
                 state.textContent = "in " + d.properties.name;
             });
 
-        const zoom = d3.zoom()
+        const zoom = d3
+            .zoom()
             .scaleExtent([1, 8]) // min and max zoom
             .on("zoom", (event) => {
                 g.attr("transform", event.transform);
@@ -185,32 +196,37 @@ function generateBubbleMap(numColonies) {
 
         svg.call(zoom);
 
-        const icons = svg.append("g")
+        const icons = svg
+            .append("g")
             .attr("class", "icon-group")
             .attr("transform", "translate(750, 10)");
-        
+
         // Add background rectangle first
-        icons.append("rect")
-            .attr("x", -10)         // small padding
+        icons
+            .append("rect")
+            .attr("x", -10) // small padding
             .attr("y", -5)
-            .attr("width", 150)     // adjust to fit all icons + spacing
+            .attr("width", 150) // adjust to fit all icons + spacing
             .attr("height", 40)
-            .attr("rx", 6)          // rounded corners (optional)
+            .attr("rx", 6) // rounded corners (optional)
             .attr("fill", "white")
             .attr("fill-opacity", 0.8);
 
-        icons.append("image")
+        icons
+            .append("image")
             .attr("xlink:href", "./dragIcon.svg") // or .png/.jpg
             .attr("width", 30)
             .attr("height", 30);
-        
-        icons.append("image")
+
+        icons
+            .append("image")
             .attr("xlink:href", "./pinchIcon.svg") // or .png/.jpg
             .attr("x", 48)
             .attr("width", 30)
             .attr("height", 28);
 
-        icons.append("image")
+        icons
+            .append("image")
             .attr("xlink:href", "./resetIcon.svg") // or .png/.jpg
             .attr("x", 100)
             .attr("y", 2)
