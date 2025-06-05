@@ -68,7 +68,7 @@ html, body {
 
 #myDropdown {
     max-width: 50%;
-    border: 2px solid rgba(255, 140, 0, 0.3);
+    border: 3px solid rgba(4, 0, 255, 0.3);
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.9);
     font-family: inherit;
@@ -80,7 +80,7 @@ html, body {
     padding: 4px 30px 4px 8px;
     cursor: pointer;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ff8c00' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='rgba(4, 0, 255, 0.3)' stroke-linecap='round' stroke-linejoin='round' stroke-width='5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
     background-position: right 8px center;
     background-repeat: no-repeat;
     background-size: 16px;
