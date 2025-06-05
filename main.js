@@ -174,6 +174,41 @@ function generateBubbleMap(numColonies) {
             });
 
         svg.call(zoom);
+
+        const icons = svg.append("g")
+            .attr("class", "icon-group")
+            .attr("transform", "translate(750, 10)");
+        
+        // Add background rectangle first
+        icons.append("rect")
+            .attr("x", -10)         // small padding
+            .attr("y", -5)
+            .attr("width", 150)     // adjust to fit all icons + spacing
+            .attr("height", 40)
+            .attr("rx", 6)          // rounded corners (optional)
+            .attr("fill", "white")
+            .attr("fill-opacity", 0.8);
+
+        icons.append("image")
+            .attr("xlink:href", "./dragIcon.svg") // or .png/.jpg
+            .attr("width", 30)
+            .attr("height", 30);
+        
+        icons.append("image")
+            .attr("xlink:href", "./pinchIcon.svg") // or .png/.jpg
+            .attr("x", 48)
+            .attr("width", 30)
+            .attr("height", 28);
+
+        icons.append("image")
+            .attr("xlink:href", "./resetIcon.svg") // or .png/.jpg
+            .attr("x", 100)
+            .attr("y", 2)
+            .attr("width", 25)
+            .attr("height", 25)
+            .on("click", function (event, d) {
+                generateBubbleMap(numColonies);
+            });
     });
 
     // Compute total colonies
