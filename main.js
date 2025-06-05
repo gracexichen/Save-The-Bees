@@ -75,16 +75,28 @@ function generateBubbleMap(numColonies) {
         const bubbleRadiusScale = d3
             .scaleLog()
             .base(10) // Could use another scale function
-            .domain([Math.max(Math.min(...Object.values(numColonies)), 1e-6), Math.max(...Object.values(numColonies))]) // Min and max values of num colonies
+            .domain([
+                Math.max(
+                    Math.min(...Object.values(numColonies)),
+                    1e-6
+                ),
+                Math.max(...Object.values(numColonies)),
+            ]) // Min and max values of num colonies
             .range([10, 35]); // Min and max bubble sizes
 
         // Retrieve the units of the bubble values, used for tooltip
-        const units = 
-            ["num_colonies", "max_colonies", "lost_colonies", "added_colonies", "renovated_colonies"].includes(selected_column)
-                ? " colonies"
-                : "%";
+        const units = [
+            "num_colonies",
+            "max_colonies",
+            "lost_colonies",
+            "added_colonies",
+            "renovated_colonies",
+        ].includes(selected_column)
+            ? " colonies"
+            : "%";
 
         // Tooltip
+        d3.select("#bubble-map-viz .tooltip").remove();
         const tooltip = d3
             .select("#bubble-map-viz")
             .append("div")
@@ -95,6 +107,7 @@ function generateBubbleMap(numColonies) {
             .style("border-width", "1px")
             .style("border-radius", "5px")
             .style("padding", "10px")
+            .style("pointer-events", "none")
             .style("position", "absolute");
 
         // Add bubbles with event listeners
@@ -226,7 +239,7 @@ function preprocessHeatMap(state, column) {
         const yVars = [1, 2, 3, 4];
 
         let heatmapData = [];
-        let maxValue = 0;        
+        let maxValue = 0;
 
         const stateData = data.filter((d) => d.state === state);
 
@@ -269,7 +282,7 @@ function preprocessHeatMap(state, column) {
             xVars: xVars,
             yVars: yVars,
             correlationData: heatmapData,
-            maxValue: maxValue
+            maxValue: maxValue,
         };
     });
 }
@@ -354,6 +367,7 @@ function generateHeatMap(heatmapData, selected_column) {
         .text("Quarter");
 
     // Define tooltip BEFORE appending cells
+    d3.select("#heat-map-viz .tooltip").remove();
     const tooltip = d3
         .select("#heat-map-viz")
         .append("div")
@@ -364,10 +378,15 @@ function generateHeatMap(heatmapData, selected_column) {
         .style("border-width", "1px")
         .style("border-radius", "5px")
         .style("padding", "10px")
+        .style("pointer-events", "none")
         .style("position", "absolute");
 
-    // Add the heatmap cells
-    svg.selectAll()
+    // First create a group for all heatmap cells
+    const heatmapCells = svg.append("g").attr("id", "heatmap-cells");
+
+    // Then append all rectangles to this group
+    heatmapCells
+        .selectAll()
         .data(heatmapData.correlationData, (d) => `${d.x}:${d.y}`)
         .enter()
         .append("rect")
@@ -385,17 +404,15 @@ function generateHeatMap(heatmapData, selected_column) {
         })
         .on("mousemove", function (event, d) {
             tooltip
-                .html(
-                    `
-                    Actual Value: ${d.actualValue}
-                    `
-                )
-                .style("left", event.pageX + 10 + "px")
-                .style("top", event.pageY - 30 + "px");
-        })
-        .on("mouseleave", function (event, d) {
-            tooltip.transition().duration(200).style("opacity", 0);
+                .html(`Actual Value: ${d.actualValue}`)
+                .style("left", event.pageX + 2 + "px")
+                .style("top", event.pageY - 3 + "px");
         });
+
+    // Add mouseleave to the SVG
+    d3.select("#heatmap-cells").on("mouseleave", function () {
+        tooltip.transition().duration(0).style("opacity", 0);
+    });
 
     // === VERTICAL LEGEND ON THE RIGHT SIDE ===
     // Legend dimensions
