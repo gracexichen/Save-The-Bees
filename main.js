@@ -159,7 +159,7 @@ function generateBubbleMap(numColonies) {
                     d.properties.name,
                     selected_column
                 ).then((heatmapData) => {
-                    generateHeatMap(heatmapData, selected_column);
+                    updateHeatmap(heatmapData, selected_column);
                 });
                 selected_state = d.properties.name;
                 const state = document.getElementById("state");
@@ -214,7 +214,7 @@ function generateBubbleMap(numColonies) {
         .on("click", function () {
             preprocessHeatMap("United States", selected_column).then(
                 (heatmapData) => {
-                    generateHeatMap(heatmapData, selected_column);
+                    updateHeatmap(heatmapData, selected_column);
                 }
             );
             selected_state = "United States";
@@ -414,6 +414,17 @@ function generateHeatMap(heatmapData, selected_column) {
         tooltip.transition().duration(0).style("opacity", 0);
     });
 
+    addHeatmapLegend(heatmapData, selected_column);
+}
+
+function addHeatmapLegend(heatmapData, selected_column) {
+    const svg = d3.select("#heat-map-viz").select("svg").select("g");
+    d3.select("#heatmap-legend").remove();
+    // dimensions of heatmap svg
+    const margin = { top: 70, right: 140, bottom: 100, left: 100 }; // increased right margin for vertical legend
+    const width = 600 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
+
     // === VERTICAL LEGEND ON THE RIGHT SIDE ===
     // Legend dimensions
     const legendWidth = 20;
@@ -422,7 +433,7 @@ function generateHeatMap(heatmapData, selected_column) {
 
     // Append a group for legend at the right side of heatmap (translated by width + margin.left + some spacing)
     const legendSvg = svg
-        .append("g")
+        .append("g").attr("id", "heatmap-legend")
         .attr(
             "transform",
             `translate(${width + legendMargin.left + 30}, 0)`
@@ -544,6 +555,39 @@ function generateHeatMap(heatmapData, selected_column) {
         .attr("font-family", "sans-serif")
         .attr("font-size", "12px");
 }
+
+
+function updateHeatmap(heatmapData, selected_column) {
+    let colorScale = d3
+        .scaleLinear()
+        .domain([
+            0,
+            heatmapData.maxValue * 0.4,
+            heatmapData.maxValue * 0.6,
+            heatmapData.maxValue,
+        ])
+        .range(["#00cc00", "#bbfc23", "#fcf223", "#fc5223"]);
+
+    const heatmapCells = d3.select("#heatmap-cells")
+
+    const rects = heatmapCells.selectAll("rect")
+        .data(heatmapData.correlationData, (d) => `${d.x}:${d.y}`)
+
+    
+    rects
+        .transition()
+        .duration(0)
+        .style("opacity", 0.2) // Fade out prior heatmap cells before transitioning
+        .transition()
+        .delay((d, i) => i * 70)
+        .duration(700)
+        .style("fill", d => d.value === null ? "grey" : colorScale(d.value)) // Step 2: update color
+        .style("opacity", 1); // Step 3: fade back in
+
+    addHeatmapLegend(heatmapData, selected_column);
+}
+
+
 
 // global variables
 let selected_column = "select_metrics";
