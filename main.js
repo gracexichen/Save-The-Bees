@@ -406,7 +406,7 @@ function generateHeatMap(heatmapData, selected_column) {
     // Create y axis
     const y = d3
         .scaleBand()
-        .range([height, 0])
+        .range([0, height])
         .domain(myVars)
         .padding(0.01);
 
