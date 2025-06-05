@@ -576,7 +576,7 @@ function updateHeatmap(heatmapData, selected_column) {
     rects
         .transition()
         .duration(0)
-        .style("opacity", 1) // Fade out prior heatmap cells before transitioning
+        .style("opacity", 0.5) // Fade out prior heatmap cells before transitioning
         .transition()
         .delay((d, i) => i * 70)
         .duration(700)
