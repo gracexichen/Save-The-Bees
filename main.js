@@ -322,18 +322,18 @@ function generateBubbleMap(numColonies) {
             .attr("fill-opacity", 0.8);
 
         icons.append("image")
-            .attr("xlink:href", "./dragIcon.svg") // or .png/.jpg
+            .attr("xlink:href", "./data/dragIcon.svg") // or .png/.jpg
             .attr("width", 30)
             .attr("height", 30);
         
         icons.append("image")
-            .attr("xlink:href", "./pinchIcon.svg") // or .png/.jpg
+            .attr("xlink:href", "./data/pinchIcon.svg") // or .png/.jpg
             .attr("x", 48)
             .attr("width", 30)
             .attr("height", 28);
 
         icons.append("image")
-            .attr("xlink:href", "./resetIcon.svg") // or .png/.jpg
+            .attr("xlink:href", "./data/resetIcon.svg") // or .png/.jpg
             .attr("x", 100)
             .attr("y", 2)
             .attr("width", 25)
@@ -844,7 +844,7 @@ function updateHeatmap(heatmapData, selected_column) {
     rects
         .transition()
         .duration(0)
-        .style("opacity", 0.2)
+        .style("opacity", 0.3)
         .transition()
         .delay((d, i) => i * 70)
         .duration(700)
