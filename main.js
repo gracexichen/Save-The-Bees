@@ -71,6 +71,12 @@ function generateBubbleMap(numColonies) {
             .domain([Math.max(Math.min(...Object.values(numColonies)), 1e-6), Math.max(...Object.values(numColonies))]) // Min and max values of num colonies
             .range([10, 35]); // Min and max bubble sizes
 
+        // Retrieve the units of the bubble values, used for tooltip
+        const units = 
+            ["num_colonies", "max_colonies", "lost_colonies", "added_colonies", "renovated_colonies"].includes(selected_column)
+                ? " colonies"
+                : "%";
+
         // Tooltip
         const tooltip = d3
             .select("#bubble-map-viz")
@@ -105,7 +111,7 @@ function generateBubbleMap(numColonies) {
                     .html(
                         `${d.properties.name}: ${Math.round(
                             numColonies[d.properties.name]
-                        ).toLocaleString()} colonies`
+                        ).toLocaleString()}${units}`
                     )
                     .style("left", event.pageX + 10 + "px")
                     .style("top", event.pageY - 30 + "px");
