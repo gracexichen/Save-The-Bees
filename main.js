@@ -68,7 +68,7 @@ function generateBubbleMap(numColonies) {
             .attr("style", "max-width: 100%; height: auto;");
 
         // Draw state interiors
-        svg.append("g")
+        const g = svg.append("g")
             .selectAll("path")
             .data(
                 states.features.filter(
@@ -121,7 +121,7 @@ function generateBubbleMap(numColonies) {
             .style("position", "absolute");
 
         // Add bubbles with event listeners
-        svg.append("g")
+        const bubbles = svg.append("g")
             .selectAll("circle")
             .data(states.features)
             .join("circle")
@@ -130,7 +130,7 @@ function generateBubbleMap(numColonies) {
             .attr("r", (d) =>
                 bubbleRadiusScale(numColonies[d.properties.name])
             )
-            .attr("fill", "#9DA0FF")
+            .attr("fill", (d) => (selected_state === d.properties.name) ? "#ffe0ad" : "#9DA0FF")
             .attr("border", "none")
             .on("mouseover", function (event, d) {
                 d3.select(this).attr("fill", "#ffe0ad");
@@ -174,6 +174,50 @@ function generateBubbleMap(numColonies) {
                 selected_state = d.properties.name;
                 const state = document.getElementById("state");
                 state.textContent = "in " + d.properties.name;
+            });
+
+        const zoom = d3.zoom()
+            .scaleExtent([1, 8]) // min and max zoom
+            .on("zoom", (event) => {
+                g.attr("transform", event.transform);
+                bubbles.attr("transform", event.transform);
+            });
+
+        svg.call(zoom);
+
+        const icons = svg.append("g")
+            .attr("class", "icon-group")
+            .attr("transform", "translate(750, 10)");
+        
+        // Add background rectangle first
+        icons.append("rect")
+            .attr("x", -10)         // small padding
+            .attr("y", -5)
+            .attr("width", 150)     // adjust to fit all icons + spacing
+            .attr("height", 40)
+            .attr("rx", 6)          // rounded corners (optional)
+            .attr("fill", "white")
+            .attr("fill-opacity", 0.8);
+
+        icons.append("image")
+            .attr("xlink:href", "./dragIcon.svg") // or .png/.jpg
+            .attr("width", 30)
+            .attr("height", 30);
+        
+        icons.append("image")
+            .attr("xlink:href", "./pinchIcon.svg") // or .png/.jpg
+            .attr("x", 48)
+            .attr("width", 30)
+            .attr("height", 28);
+
+        icons.append("image")
+            .attr("xlink:href", "./resetIcon.svg") // or .png/.jpg
+            .attr("x", 100)
+            .attr("y", 2)
+            .attr("width", 25)
+            .attr("height", 25)
+            .on("click", function (event, d) {
+                generateBubbleMap(numColonies);
             });
     });
 
