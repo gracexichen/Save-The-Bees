@@ -2,8 +2,6 @@ html, body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    width: 100%;
-    height: 100%;
     background-image: url('data/background-honey.jpg');
 }
 
@@ -18,9 +16,8 @@ html, body {
     display: flex;
     flex-direction: row;
     height: calc(100vh - 60px);
-    width: 100vw;
     position: relative;
-    gap:15px;
+    gap: 15px;
 }
 
 #container::before {
@@ -119,7 +116,6 @@ html, body {
     padding: 8px;
     width: 100%;
     box-sizing: border-box;
-    flex-shrink: 0;
 }
 
 #heat-map-viz {
@@ -141,4 +137,28 @@ select {
     -webkit-appearance: none;
     -moz-appearance: none;
     text-indent: 1px;
+}
+
+@media (max-width: 1000px) {
+    #container {
+        min-width: 1000px;
+        overflow-x: auto;
+    }
+    
+    #left-container,
+    #right-container {
+        min-width: 500px;
+    }
+}
+
+@media (max-height: 500px) {
+    #container {
+        min-height: 500px;
+        overflow-y: auto;
+    }
+    
+    #left-container,
+    #right-container {
+        min-height: 500px;
+    }
 }
