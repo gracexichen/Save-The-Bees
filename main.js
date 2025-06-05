@@ -9,38 +9,40 @@ const percent_columns = [
   "pesticides"
 ];
 
-function preprocessNumColonies() {
+function preprocessBubbleData(selected_column) {
     // Returns the average number of colonies per state as a dictionary
     return d3.csv("data/save_the_bees.csv").then((data) => {
-        let numColoniesCount = {};
+        let countPerState = {};
 
         data.forEach((entry) => {
             const state = entry["state"];
-            const colonies = +entry["num_colonies"];
+            const count = +entry[selected_column];
 
-            if (!numColoniesCount[state]) {
-                numColoniesCount[state] = {
-                    totalColonies: 0,
+            if (!countPerState[state]) {
+                countPerState[state] = {
+                    total: 0,
                     count: 0,
                 };
             }
 
-            numColoniesCount[state].totalColonies += colonies;
-            numColoniesCount[state].count += 1;
+            countPerState[state].total += count;
+            countPerState[state].count += 1;
         });
 
-        let averageColonies = {};
-        Object.keys(numColoniesCount).forEach((state) => {
-            averageColonies[state] =
-                numColoniesCount[state].totalColonies /
-                numColoniesCount[state].count;
+        let averagePerState = {};
+        Object.keys(countPerState).forEach((state) => {
+            averagePerState[state] =
+                countPerState[state].total /
+                countPerState[state].count;
         });
 
-        return averageColonies;
+        return averagePerState;
     });
 }
 
 function generateBubbleMap(numColonies) {
+    d3.select("#bubble-map-viz").select("svg").remove();
+
     d3.json("/data/counties-albers-10m.json").then((us) => {
         const path = d3.geoPath();
 
@@ -73,8 +75,14 @@ function generateBubbleMap(numColonies) {
         const bubbleRadiusScale = d3
             .scaleLog()
             .base(10) // Could use another scale function
-            .domain([3616, 2917015]) // Min and max values of num colonies
+            .domain([Math.max(Math.min(...Object.values(numColonies)), 1e-6), Math.max(...Object.values(numColonies))]) // Min and max values of num colonies
             .range([10, 35]); // Min and max bubble sizes
+
+        // Retrieve the units of the bubble values, used for tooltip
+        const units = 
+            ["num_colonies", "max_colonies", "lost_colonies", "added_colonies", "renovated_colonies"].includes(selected_column)
+                ? " colonies"
+                : "%";
 
         // Tooltip
         const tooltip = d3
@@ -110,7 +118,7 @@ function generateBubbleMap(numColonies) {
                     .html(
                         `${d.properties.name}: ${Math.round(
                             numColonies[d.properties.name]
-                        ).toLocaleString()} colonies`
+                        ).toLocaleString()}${units}`
                     )
                     .style("left", event.pageX + 10 + "px")
                     .style("top", event.pageY - 30 + "px");
@@ -144,17 +152,6 @@ function generateBubbleMap(numColonies) {
                 const state = document.getElementById("state");
                 state.textContent = "in " + d.properties.name;
             });
-
-        // Draw state boundaries
-        svg.append("path")
-            .datum(
-                topojson.mesh(us, us.objects.states, (a, b) => {
-                    return a !== b;
-                })
-            )
-            .attr("fill", "none")
-            .attr("stroke-linejoin", "round")
-            .attr("d", path);
     });
 
     // Compute total colonies
@@ -552,8 +549,8 @@ let descriptions = {"num_colonies":"The number of colonies per quarter.",
 
 function main() {
     // Initialize bubble map
-    preprocessNumColonies().then((numColonies) => {
-        generateBubbleMap(numColonies);
+    preprocessBubbleData(selected_column).then((aggregated_data) => {
+        generateBubbleMap(aggregated_data);
     });
 
     // Initialize heat map
@@ -574,6 +571,9 @@ function main() {
                     generateHeatMap(heatmapData, selected_column);
                 }
             );
+            preprocessBubbleData(selected_column).then((aggregated_data) => {
+                generateBubbleMap(aggregated_data);
+            });
         });
 }
 
