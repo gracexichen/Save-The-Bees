@@ -5,6 +5,7 @@ html, body {
     background-image: url('data/background-honey.jpg');
 }
 
+/* Main Title */
 #main-title {
     text-align: center;
     font-family: Arial, sans-serif;
@@ -32,6 +33,7 @@ html, body {
     z-index: -1;
 }
 
+/* Left Container */
 #left-container {
     margin-left: 15px;
     border: 3px solid rgba(255, 140, 0, 0.6);
@@ -56,6 +58,17 @@ html, body {
     border: 3px solid rgba(255, 140, 0, 0.6);
 }
 
+#bubble-map-viz {
+    flex: 1;
+    margin: 20px;
+}
+
+#us-map {
+    flex: 1;
+    margin: 20px;
+}
+
+/* Right Container */
 #right-container {
     margin-right: 15px;
     display: flex;
@@ -122,23 +135,8 @@ html, body {
     flex: 1;
 }
 
-#bubble-map-viz {
-    flex: 1;
-    margin: 20px;
-}
 
-#us-map {
-    flex: 1;
-    margin: 20px;
-}
-
-/* Remove arrow from dropdown */
-select {
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    text-indent: 1px;
-}
-
+/* Minimum screen size */
 @media (max-width: 1000px) {
     #container {
         min-width: 1000px;
