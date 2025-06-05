@@ -626,7 +626,7 @@ function addHeatmapLegend(
     // Add Null color swatch
     legendSvg
         .append("rect")
-        .attr("x", legendWidth - 20)
+        .attr("x", legendWidth - 35)
         .attr("y", legendHeight + 10)
         .attr("width", legendWidth)
         .attr("height", 20)
@@ -634,10 +634,10 @@ function addHeatmapLegend(
     // Add Null color swatch label
     legendSvg
         .append("text")
-        .attr("x", legendWidth + 25)
+        .attr("x", legendWidth + 15)
         .attr("y", legendHeight + 25)
         .style("fill", "black")
-        .text("No data")
+        .text("N/A")
         .attr("text-anchor", "left")
         .attr("text-anchor", "middle")
         .attr("font-family", "sans-serif")
