@@ -354,8 +354,8 @@ function generateBubbleMap(numColonies) {
             .select("#us-map")
             .append("svg")
             .attr("width", 200)
-            .attr("height", 170)
-            .attr("viewBox", [0, 0, 980, 610]) // scale map to fit your size
+            .attr("height", 140)
+            .attr("viewBox", [0, 0, 980, 710]) // scale map to fit your size
             .attr("style", "max-width: 100%; height: auto; border: 1px solid black;");
         
         states.features.filter(
@@ -897,7 +897,11 @@ function main() {
         .getElementById("myDropdown")
         .addEventListener("change", function () {
             selected_column = this.value;
+            const dropdown = document.getElementById("myDropdown");
+            const selectedText = dropdown.options[dropdown.selectedIndex].textContent;
 
+            document.getElementById("left-title").textContent =
+                `Average ${selectedText} over the Years`;
             document.getElementById("description").textContent =
                 descriptions[selected_column];
             preprocessHeatMap(selected_state, selected_column).then(

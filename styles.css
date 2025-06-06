@@ -65,7 +65,7 @@ html, body {
 
 #us-map {
     flex: 1;
-    margin-top: 20px;
+    margin-top: -10px;
     margin-right: 40px;
     justify-self: flex-end;
 }
