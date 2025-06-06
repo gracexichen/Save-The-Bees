@@ -267,13 +267,9 @@ function generateBubbleMap(numColonies) {
             })
             .on("mouseleave", function (event, d) {
                 // Unhighlight hovered state
-                if (selected_state === d.properties.name) {
-                    d3.selectAll("circle").attr("fill", "#9DA0FF");
-                    d3.select(this).attr("fill", "#ffe0ad");
-                    return;
+                if (selected_state !== d.properties.name) {
+                    d3.select(this).attr("fill", "#9DA0FF");
                 }
-                d3.select(this).attr("fill", "#9DA0FF");
-
                 // Hide tooltip
                 tooltip.transition().style("opacity", 0);
             })
@@ -296,6 +292,9 @@ function generateBubbleMap(numColonies) {
                 selected_state = d.properties.name;
                 const state = document.getElementById("state");
                 state.textContent = "in " + d.properties.name;
+
+                d3.selectAll("circle").attr("fill", "#9DA0FF");
+                d3.select(this).attr("fill", "#ffe0ad");
             });
 
         const zoom = d3.zoom()
@@ -374,6 +373,21 @@ function generateBubbleMap(numColonies) {
             .attr("stroke", "#333")
             .attr("stroke-width", 4);
 
+        // Initialize tooltip
+        d3.select("#us-map .tooltip").remove();
+        const tooltip = d3
+            .select("#us-map")
+            .append("div")
+            .style("opacity", 0)
+            .attr("class", "tooltip")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "1px")
+            .style("border-radius", "5px")
+            .style("padding", "10px")
+            .style("pointer-events", "none")
+            .style("position", "absolute");
+
         // Compute total colonies
         const totalColonies = Object.values(numColonies).reduce(
             (a, b) => a + b,
@@ -413,7 +427,9 @@ function generateBubbleMap(numColonies) {
                     .style("top", event.pageY - 30 + "px");
             })
             .on("mouseleave", function () {
-                d3.select(this).attr("fill", "#9DA0FF");
+                if (selected_state !== "United States") {
+                    d3.select(this).attr("fill", "#9DA0FF");
+                }
                 tooltip.style("opacity", 0);
             })
             .on("click", function () {
@@ -424,11 +440,11 @@ function generateBubbleMap(numColonies) {
                     }
                 );
                 selected_state = "United States";
-                console.log(selected_state)
                 const state = document.getElementById("state");
                 state.textContent = "in " + "United States";
-                d3.select("#us-map").select("circle")
-                    .attr("fill", "pink");
+                // Update all bubble fills to reflect the new selected state
+                d3.select("#bubble-map-viz").selectAll("circle")
+                    .attr("fill", "#9DA0FF");
             });
 
         // Add label below the bubble
