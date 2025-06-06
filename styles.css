@@ -1,7 +1,6 @@
 html, body {
     margin: 0;
     padding: 0;
-    overflow: hidden;
     background-image: url('data/background-honey.jpg');
 }
 
@@ -16,7 +15,7 @@ html, body {
 #container {
     display: flex;
     flex-direction: row;
-    height: calc(100vh - 60px);
+    min-height: calc(100vh - 60px);
     position: relative;
     gap: 15px;
 }
@@ -148,17 +147,5 @@ html, body {
     #left-container,
     #right-container {
         min-width: 500px;
-    }
-}
-
-@media (max-height: 500px) {
-    #container {
-        min-height: 500px;
-        overflow-y: auto;
-    }
-    
-    #left-container,
-    #right-container {
-        min-height: 500px;
     }
 }
