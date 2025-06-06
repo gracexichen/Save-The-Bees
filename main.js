@@ -315,33 +315,33 @@ function generateBubbleMap(numColonies) {
             .attr("class", "icon-group")
             .attr("transform", "translate(750, 10)");
 
-        // Add background rectangle first
+        // Add opaque background for zoom-pan icons
         icons
             .append("rect")
-            .attr("x", -10) // small padding
+            .attr("x", -10)
             .attr("y", -5)
-            .attr("width", 150) // adjust to fit all icons + spacing
+            .attr("width", 150)
             .attr("height", 40)
-            .attr("rx", 6) // rounded corners (optional)
+            .attr("rx", 6)
             .attr("fill", "white")
             .attr("fill-opacity", 0.8);
 
         icons
             .append("image")
-            .attr("xlink:href", "./data/dragIcon.svg") // or .png/.jpg
+            .attr("xlink:href", "./data/dragIcon.svg")
             .attr("width", 30)
             .attr("height", 30);
 
         icons
             .append("image")
-            .attr("xlink:href", "./data/pinchIcon.svg") // or .png/.jpg
+            .attr("xlink:href", "./data/pinchIcon.svg")
             .attr("x", 48)
             .attr("width", 30)
             .attr("height", 28);
 
         icons
             .append("image")
-            .attr("xlink:href", "./data/resetIcon.svg") // or .png/.jpg
+            .attr("xlink:href", "./data/resetIcon.svg")
             .attr("x", 100)
             .attr("y", 2)
             .attr("width", 25)
@@ -351,8 +351,9 @@ function generateBubbleMap(numColonies) {
             });
     });
 
+    // create the mini US map
     d3.json("/data/counties-albers-10m.json").then((us) => {
-        const path = d3.geoPath(); // ← no projection, use as-is
+        const path = d3.geoPath();
         const states = topojson.feature(us, us.objects.states);
 
         const usSvg = d3
@@ -360,7 +361,7 @@ function generateBubbleMap(numColonies) {
             .append("svg")
             .attr("width", 190)
             .attr("height", 100)
-            .attr("viewBox", [0, 0, 980, 710]) // scale map to fit your size
+            .attr("viewBox", [0, 0, 980, 710])
             .attr(
                 "style",
                 "max-width: 100%; height: auto; border: 1px solid black;"
@@ -368,10 +369,11 @@ function generateBubbleMap(numColonies) {
 
         states.features.filter((d) => d.properties.name !== "Alaska");
 
+        // remove interior/state borders of the US map
         const outerBorder = topojson.mesh(
             us,
             us.objects.states,
-            (a, b) => a === b && a.id !== "02" // only draw the outer edge, skip Alaska
+            (a, b) => a === b && a.id !== "02"
         );
 
         usSvg
@@ -382,7 +384,7 @@ function generateBubbleMap(numColonies) {
             .attr("stroke", "#333")
             .attr("stroke-width", 4);
 
-        // Initialize tooltip
+        // Tooltop for US bubble
         d3.select("#us-map .tooltip").remove();
         const tooltip = d3
             .select("#us-map")
@@ -403,15 +405,16 @@ function generateBubbleMap(numColonies) {
             0
         );
 
-        // Create a scale for bubble size
+        // Create a large bubble for the aggregated US data
         const bubbleRadiusScale = d3
             .scaleLog()
-            .base(10) // Could use another scale function
-            .domain([totalColonies, totalColonies]) // Min and max values of num colonies
-            .range([150, 150]); // Min and max bubble sizes
+            .base(10) 
+            .domain([totalColonies, totalColonies]) 
+            .range([150, 150]); 
 
         const usBubbleGroup = usSvg.append("g");
 
+        // add the bubble with it's hover and click logic
         usBubbleGroup
             .append("circle")
             .attr("cx", 490)
