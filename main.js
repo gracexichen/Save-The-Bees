@@ -844,7 +844,7 @@ function updateHeatmap(heatmapData, selected_column) {
     rects
         .transition()
         .duration(0)
-        .style("opacity", 0.3)
+        .style("opacity", 0.2)
         .transition()
         .delay((d, i) => i * 70)
         .duration(700)
