@@ -1,9 +1,9 @@
 // Reference: https://observablehq.com/@d3/us-state-choropleth/2
 
 // <----------------------------------------------- GLOBAL VARIABLES ----------------------------------------------->
-let selected_column = "select_metrics";
-let selected_column_name = "select_metrics";
-let selected_state = "";
+let selected_column = "num_colonies";
+let selected_column_name = "num_colonies";
+let selected_state = "United States";
 
 // Column names for metrics out of 100 percent
 const percent_columns = [
@@ -86,6 +86,10 @@ function debounce(func, wait) {
  * Initializes the visualization (heat map and bubble map)
  */
 function initializeVisualization() {
+    document.getElementById("myDropdown").value = selected_column
+    const state = document.getElementById("state");
+    state.textContent = `in ${selected_state}`;
+
     // Initialize bubble map
     preprocessBubbleData(selected_column).then((aggregated_data) => {
         generateBubbleMap(aggregated_data);
