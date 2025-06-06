@@ -86,7 +86,6 @@ function debounce(func, wait) {
  * Initializes the visualization (heat map and bubble map)
  */
 function initializeVisualization() {
-    document.getElementById("myDropdown").value = selected_column
     const state = document.getElementById("state");
     state.textContent = `in ${selected_state}`;
 
@@ -898,20 +897,6 @@ function main() {
         .getElementById("myDropdown")
         .addEventListener("change", function () {
             selected_column = this.value;
-            if (selected_column == "select_metrics") {
-                selected_column_name = "select_metrics";
-                selected_state = "";
-                const state = document.getElementById("state");
-                state.textContent = "in {select state}";
-
-                d3.select("#bubble-map-viz").selectAll("*").remove();
-                d3.select("#us-map").selectAll("*").remove();
-                d3.select("#heat-map-viz").selectAll("*").remove();
-
-                document.getElementById("description").textContent =
-                    descriptions[selected_column];
-                return;
-            }
 
             document.getElementById("description").textContent =
                 descriptions[selected_column];
