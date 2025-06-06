@@ -165,7 +165,7 @@ function generateBubbleMap(numColonies) {
         const svg = d3
             .select("#bubble-map-viz")
             .append("svg")
-            .attr("width", 975)
+            .attr("width", 1100)
             .attr("height", 610)
             .attr("viewBox", [0, 0, 975, 610])
             .attr("style", "max-width: 100%; height: auto;");
@@ -283,7 +283,7 @@ function generateBubbleMap(numColonies) {
                 //         numColonies[d.properties.name] +
                 //         " colonies"
                 // );
-                if (selected_state === d.properties.name) return
+                if (selected_state === d.properties.name) return;
                 preprocessHeatMap(
                     d.properties.name,
                     selected_column
@@ -300,7 +300,8 @@ function generateBubbleMap(numColonies) {
                 d3.select(this).attr("fill", "#ffe0ad");
             });
 
-        const zoom = d3.zoom()
+        const zoom = d3
+            .zoom()
             .scaleExtent([1, 8]) // min and max zoom
             .on("zoom", (event) => {
                 g.attr("transform", event.transform);
@@ -309,32 +310,37 @@ function generateBubbleMap(numColonies) {
 
         svg.call(zoom);
 
-        const icons = svg.append("g")
+        const icons = svg
+            .append("g")
             .attr("class", "icon-group")
             .attr("transform", "translate(750, 10)");
-        
+
         // Add background rectangle first
-        icons.append("rect")
-            .attr("x", -10)         // small padding
+        icons
+            .append("rect")
+            .attr("x", -10) // small padding
             .attr("y", -5)
-            .attr("width", 150)     // adjust to fit all icons + spacing
+            .attr("width", 150) // adjust to fit all icons + spacing
             .attr("height", 40)
-            .attr("rx", 6)          // rounded corners (optional)
+            .attr("rx", 6) // rounded corners (optional)
             .attr("fill", "white")
             .attr("fill-opacity", 0.8);
 
-        icons.append("image")
+        icons
+            .append("image")
             .attr("xlink:href", "./data/dragIcon.svg") // or .png/.jpg
             .attr("width", 30)
             .attr("height", 30);
-        
-        icons.append("image")
+
+        icons
+            .append("image")
             .attr("xlink:href", "./data/pinchIcon.svg") // or .png/.jpg
             .attr("x", 48)
             .attr("width", 30)
             .attr("height", 28);
 
-        icons.append("image")
+        icons
+            .append("image")
             .attr("xlink:href", "./data/resetIcon.svg") // or .png/.jpg
             .attr("x", 100)
             .attr("y", 2)
@@ -345,7 +351,6 @@ function generateBubbleMap(numColonies) {
             });
     });
 
-
     d3.json("/data/counties-albers-10m.json").then((us) => {
         const path = d3.geoPath(); // ← no projection, use as-is
         const states = topojson.feature(us, us.objects.states);
@@ -353,23 +358,24 @@ function generateBubbleMap(numColonies) {
         const usSvg = d3
             .select("#us-map")
             .append("svg")
-            .attr("width", 200)
-            .attr("height", 140)
+            .attr("width", 190)
+            .attr("height", 100)
             .attr("viewBox", [0, 0, 980, 710]) // scale map to fit your size
-            .attr("style", "max-width: 100%; height: auto; border: 1px solid black;");
-        
-        states.features.filter(
-            (d) => d.properties.name !== "Alaska"
-        )
+            .attr(
+                "style",
+                "max-width: 100%; height: auto; border: 1px solid black;"
+            );
+
+        states.features.filter((d) => d.properties.name !== "Alaska");
 
         const outerBorder = topojson.mesh(
             us,
             us.objects.states,
-            (a, b) =>
-            (a === b && a.id !== "02") // only draw the outer edge, skip Alaska
+            (a, b) => a === b && a.id !== "02" // only draw the outer edge, skip Alaska
         );
 
-        usSvg.append("path")
+        usSvg
+            .append("path")
             .datum(outerBorder)
             .attr("d", path)
             .attr("fill", "#eee")
@@ -401,10 +407,7 @@ function generateBubbleMap(numColonies) {
         const bubbleRadiusScale = d3
             .scaleLog()
             .base(10) // Could use another scale function
-            .domain([
-                totalColonies,
-                totalColonies,
-            ]) // Min and max values of num colonies
+            .domain([totalColonies, totalColonies]) // Min and max values of num colonies
             .range([150, 150]); // Min and max bubble sizes
 
         const usBubbleGroup = usSvg.append("g");
@@ -414,7 +417,11 @@ function generateBubbleMap(numColonies) {
             .attr("cx", 490)
             .attr("cy", 305)
             .attr("r", bubbleRadiusScale(totalColonies))
-            .attr("fill", () => (selected_state === "United States") ? "#ffe0ad" : "#9DA0FF")
+            .attr("fill", () =>
+                selected_state === "United States"
+                    ? "#ffe0ad"
+                    : "#9DA0FF"
+            )
             .on("mouseover", function () {
                 d3.select(this).attr("fill", "#ffe0ad");
                 tooltip.style("opacity", 1);
@@ -436,17 +443,19 @@ function generateBubbleMap(numColonies) {
                 tooltip.style("opacity", 0);
             })
             .on("click", function () {
-                if (selected_state === "United States") return
-                preprocessHeatMap("United States", selected_column).then(
-                    (heatmapData) => {
-                        updateHeatmap(heatmapData, selected_column);
-                    }
-                );
+                if (selected_state === "United States") return;
+                preprocessHeatMap(
+                    "United States",
+                    selected_column
+                ).then((heatmapData) => {
+                    updateHeatmap(heatmapData, selected_column);
+                });
                 selected_state = "United States";
                 const state = document.getElementById("state");
                 state.textContent = "in " + "United States";
                 // Update all bubble fills to reflect the new selected state
-                d3.select("#bubble-map-viz").selectAll("circle")
+                d3.select("#bubble-map-viz")
+                    .selectAll("circle")
                     .attr("fill", "#9DA0FF");
             });
 
